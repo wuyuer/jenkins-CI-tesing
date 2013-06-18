@@ -10,8 +10,11 @@ ftp.cwd('pub/tools/crosstool/files/bin/x86_64/%s' %gcc_ver)
 files = ftp.nlst()
 for f in files: 
     if f[-3:] == '.xz':
+        if os.path.exists(f):
+            print "Already exists:", f
+            continue
+
         print "Retrieving", f
         ftp.retrbinary('RETR %s' %f, open(f, 'wb').write)
-        break
 
 ftp.quit()
