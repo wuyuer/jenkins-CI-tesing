@@ -2,7 +2,7 @@
 
 TOOLS=`dirname $0`
 
-START_TIME=`date +%s`
+START=`date +%s`
 COUNT=0
 
 DEFCONFIGS=`(cd arch/arm/configs; echo *_defconfig)`
@@ -11,7 +11,8 @@ for defconfig in $DEFCONFIGS; do
   COUNT=$(( $COUNT + 1 ))
 done
 
-END_TIME=`date +%s`
-BUILD_TIME=$(( $END_TIME - $START_TIME ))
-
-echo "Build ${COUNT} ARM defconfigs in ${BUILD_TIME} seconds."
+END=`date +%s`
+BUILD_TIME=$(( $END - $START ))
+MIN=$(( BUILD_TIME / 60 ))
+SEC=$(( BUILD_TIME % 60 ))
+echo "Build ${COUNT} ARM defconfigs in $MIN min, %SEC sec."

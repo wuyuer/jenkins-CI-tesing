@@ -42,7 +42,7 @@ MAKE_OPTS+="O=${OUTPUT_DIR} "
 CCACHE=`which ccache`
 if [[ ${CCACHE} ]]; then
   MAKE_OPTS+="CC=\"ccache ${CROSS_COMPILE}gcc\" "
-  export CCACHE_DIR=${OUTPUT_BASE}
+  export CCACHE_DIR=${OUTPUT_BASE}/ccache
 fi
 
 RESULT="PASS"
@@ -74,6 +74,16 @@ echo
 echo
 
 function do_report {
+    if [[ ${CCACHE} ]]; then
+       (set -x; ${CCACHE} --show-stats)
+    fi
+
+    # Clean up: if output is in tmpfs, delete it
+    if [[ ${OUTPUT_DIR} = /run/shm/* ]]; then
+       echo "Removing build output: ${OUTPUT_DIR}"
+       /bin/rm -rf ${OUTPUT_DIR}
+    fi
+
     END_TIME=`date +%s`
     BUILD_TIME=$(( $END_TIME - $START_TIME ))
     echo 
@@ -89,10 +99,6 @@ function do_report {
        echo "Result: ${ARCH}-${defconfig}: ${RESULT} # Build time: ${BUILD_TIME} seconds." > /dev/tty
     fi
 
-    # Clean up
-    #echo "Removing build output: ${OUTPUT_DIR}"
-    #/bin/rm -rf ${OUTPUT_DIR}
-
     exit $1;
 }
 
@@ -104,9 +110,6 @@ function do_make {
 	do_report $retval
     fi
 
-    # Clean up
-    /bin/rm -rf ${OUTPUT_DIR}
-
     return $retval
 }
 
@@ -115,6 +118,10 @@ echo "-${ARCH}-${defconfig}" > localversion
 # Show compiler version
 (set -x; ${CROSS_COMPILE}gcc --version)
 
+if [[ ${CCACHE} ]]; then
+   (set -x; ${CCACHE} --zero-stats)
+fi
+
 START_TIME=`date +%s`
 
 # Configure
@@ -122,6 +129,7 @@ do_make ${defconfig}
 
 # Build kernel
 do_make
+(set -x; ${CROSS_COMPILE}size ${OUTPUT_DIR}/vmlinux)
 
 # Optionally build modules
 if [ -e ${OUTPUT_DIR}/.config ]; then
