@@ -113,8 +113,6 @@ function do_make {
     return $retval
 }
 
-echo "-${ARCH}-${defconfig}" > localversion
-
 # Show compiler version
 (set -x; ${CROSS_COMPILE}gcc --version)
 
