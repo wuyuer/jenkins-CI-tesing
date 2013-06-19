@@ -15,4 +15,4 @@ END=`date +%s`
 BUILD_TIME=$(( $END - $START ))
 MIN=$(( BUILD_TIME / 60 ))
 SEC=$(( BUILD_TIME % 60 ))
-echo "Build ${COUNT} ARM defconfigs in $MIN min, %SEC sec."
+echo "Build ${COUNT} ARM defconfigs in $MIN min, $SEC sec."
