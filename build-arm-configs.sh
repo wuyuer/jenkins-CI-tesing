@@ -10,7 +10,8 @@ FAIL=0
 RESULTS_PASS=()
 RESULTS_FAIL=()
 
-DEFCONFIGS=`(cd arch/arm/configs; echo *_defconfig)`
+DEFCONFIGS='allnoconfig '
+DEFCONFIGS+=`(cd arch/arm/configs; echo *_defconfig)`
 
 for defconfig in $DEFCONFIGS; do
   ${TOOLS}/build.sh --quiet arm ${defconfig}
