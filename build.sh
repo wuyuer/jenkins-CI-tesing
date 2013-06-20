@@ -49,10 +49,8 @@ fi
 RESULT="PASS"
 
 # Redirect stdout ( > ) into a named pipe ( >() ) running "tee"
-touch ${BUILD_LOG}
 if [ $QUIET -eq 1 ]; then
-    echo "Build log: ${BUILD_LOG}"
-    exec >> ${BUILD_LOG}
+    exec > ${BUILD_LOG}
 else
     exec > >(tee ${BUILD_LOG})
 fi
@@ -93,10 +91,8 @@ function do_report {
     echo "Result: ${ARCH}-${defconfig}: ${RESULT} # Build time: ${BUILD_TIME} seconds."
     echo
 
-    echo ${ARCH}-${defconfig} >> ${OUTPUT_TOP}/${RESULT}
-
     if [ $QUIET -eq 1 ]; then
-       echo "Result: ${ARCH}-${defconfig}: ${RESULT} # Build time: ${BUILD_TIME} seconds." > /dev/tty
+	echo $ARCH-$defconfig $RESULT $BUILD_TIME | awk '{ printf "Result: %32s: %s # Build time: %4d sec\n", $1, $2, $3}' > /dev/tty
     fi
 
     exit $1;
