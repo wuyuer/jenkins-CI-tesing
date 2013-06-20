@@ -4,15 +4,51 @@ TOOLS=`dirname $0`
 
 START=`date +%s`
 COUNT=0
+PASS=0
+FAIL=0
+
+RESULTS_PASS=()
+RESULTS_FAIL=()
 
 DEFCONFIGS=`(cd arch/arm/configs; echo *_defconfig)`
+
 for defconfig in $DEFCONFIGS; do
   ${TOOLS}/build.sh --quiet arm ${defconfig}
-  COUNT=$(( $COUNT + 1 ))
+  if [ $? = 0 ]; then
+    PASS=$(( $PASS + 1 ))
+    RESULTS_PASS+=(${defconfig})
+  else
+    FAIL=$(( $FAIL + 1 ))
+    RESULTS_FAIL+=(${defconfig})
+  fi
 done
 
 END=`date +%s`
 BUILD_TIME=$(( $END - $START ))
 MIN=$(( BUILD_TIME / 60 ))
 SEC=$(( BUILD_TIME % 60 ))
-echo "Build ${COUNT} ARM defconfigs in $MIN min, $SEC sec."
+COUNT=$(( $PASS + $FAIL ))
+
+echo "Current commit: "
+git log -n1 --oneline --abbrev=8 
+echo -n "git desribe: "
+git describe
+echo
+
+echo "Built ${COUNT} ARM defconfigs in $MIN min, $SEC sec. $PASS passed, $FAIL failed."
+
+echo 
+echo "--------------"
+echo "Builds failed:"
+echo "--------------"
+for b in ${RESULTS_FAIL[@]}; do
+  echo $b
+done
+
+echo 
+echo "--------------"
+echo "Builds passed:"
+echo "--------------"
+for b in ${RESULTS_PASS[@]}; do
+  echo $b
+done
