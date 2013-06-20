@@ -29,20 +29,21 @@ MAKE_OPTS+="-k -j${MAKE_THREADS} "
 DATE=`date +%Y%m%d.%H%M%S`
 GIT_HASH=`git log -n1 --abbrev=8 --format=%h`
 if [[ ${TMPDIR} ]]; then
-  OUTPUT_BASE="${TMPDIR}/build-${GIT_HASH}"
+  OUTPUT_TOP="${TMPDIR}/build-${GIT_HASH}"
 else
-  OUTPUT_BASE="build-${GIT_HASH}"
+  OUTPUT_TOP="build-${GIT_HASH}"
 fi
 
-OUTPUT_DIR="${OUTPUT_BASE}/${ARCH}-${defconfig}"
-BUILD_LOG=${OUTPUT_BASE}/${ARCH}-${defconfig}-${DATE}.log
+OUTPUT_BASE=${OUTPUT_TOP}/${ARCH}-${defconfig}
+OUTPUT_DIR=${OUTPUT_BASE}/output
+BUILD_LOG=${OUTPUT_BASE}/build.log
 mkdir -p ${OUTPUT_DIR}
 MAKE_OPTS+="O=${OUTPUT_DIR} "
 
 CCACHE=`which ccache`
 if [[ ${CCACHE} ]]; then
   MAKE_OPTS+="CC=\"ccache ${CROSS_COMPILE}gcc\" "
-  export CCACHE_DIR=${OUTPUT_BASE}/ccache
+  export CCACHE_DIR=${OUTPUT_TOP}/ccache
 fi
 
 RESULT="PASS"
@@ -88,12 +89,11 @@ function do_report {
     BUILD_TIME=$(( $END_TIME - $START_TIME ))
     echo 
     echo "========================================================"
-    echo "Build output: ${OUTPUT_DIR}"
     echo "Build log: ${BUILD_LOG}"
     echo "Result: ${ARCH}-${defconfig}: ${RESULT} # Build time: ${BUILD_TIME} seconds."
     echo
 
-    echo ${ARCH}-${defconfig} >> ${OUTPUT_BASE}/${RESULT}
+    echo ${ARCH}-${defconfig} >> ${OUTPUT_TOP}/${RESULT}
 
     if [ $QUIET -eq 1 ]; then
        echo "Result: ${ARCH}-${defconfig}: ${RESULT} # Build time: ${BUILD_TIME} seconds." > /dev/tty
@@ -124,16 +124,33 @@ START_TIME=`date +%s`
 
 # Configure
 do_make ${defconfig}
+cp ${OUTPUT_DIR}/.config ${OUTPUT_BASE}/kernel.config
 
 # Build kernel
-do_make
+if [ ${ARCH} = arm ]; then
+    target="zImage dtbs"
+fi
+
+do_make ${target}
+
+if [ ${ARCH} = arm ]; then
+    (cd ${OUTPUT_DIR}; cp -a System.map arch/arm/boot/zImage ${OUTPUT_BASE})
+    mkdir -p ${OUTPUT_BASE}/dts
+    cp -a ${OUTPUT_DIR}/arch/arm/boot/dts/*.dtb ${OUTPUT_BASE}/dts
+fi
+    
 (set -x; ${CROSS_COMPILE}size ${OUTPUT_DIR}/vmlinux)
+
+
 
 # Optionally build modules
 if [ -e ${OUTPUT_DIR}/.config ]; then
     grep -q CONFIG_MODULES=y ${OUTPUT_DIR}/.config
     if [ $? = 0 ]; then
 	do_make modules
+
+	export INSTALL_MOD_PATH=${OUTPUT_BASE}
+	do_make modules_install
     fi
 fi
 
