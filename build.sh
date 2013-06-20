@@ -31,7 +31,7 @@ GIT_HASH=`git log -n1 --abbrev=8 --format=%h`
 if [[ ${TMPDIR} ]]; then
   OUTPUT_TOP="${TMPDIR}/build-${GIT_HASH}"
 else
-  OUTPUT_TOP="build-${GIT_HASH}"
+  OUTPUT_TOP="${PWD}/build-${GIT_HASH}"
 fi
 
 OUTPUT_BASE=${OUTPUT_TOP}/${ARCH}-${defconfig}
@@ -40,10 +40,15 @@ BUILD_LOG=${OUTPUT_BASE}/build.log
 mkdir -p ${OUTPUT_DIR}
 MAKE_OPTS+="O=${OUTPUT_DIR} "
 
-CCACHE=`which ccache`
+if [[ -z ${CCACHE_DISABLE} ]]; then
+  CCACHE=`which ccache`
+fi
 if [[ ${CCACHE} ]]; then
   MAKE_OPTS+="CC=\"ccache ${CROSS_COMPILE}gcc\" "
-  export CCACHE_DIR=${OUTPUT_TOP}/ccache
+  if [[ -z ${CCACHE_DIR} ]]; then
+     export CCACHE_DIR=${OUTPUT_TOP}/ccache
+     mkdir -p ${CCACHE_DIR}
+  fi
 fi
 
 RESULT="PASS"
@@ -85,9 +90,8 @@ function do_report {
 
     END_TIME=`date +%s`
     BUILD_TIME=$(( $END_TIME - $START_TIME ))
+
     echo 
-    echo "========================================================"
-    echo "Build log: ${BUILD_LOG}"
     echo "Result: ${ARCH}-${defconfig}: ${RESULT} # Build time: ${BUILD_TIME} seconds."
     echo
 
