@@ -82,11 +82,8 @@ function do_report {
        (set -x; ${CCACHE} --show-stats)
     fi
 
-    # Clean up: if output is in tmpfs, delete it
-    if [[ ${OUTPUT_DIR} = /run/shm/* ]]; then
-       echo "Removing build output: ${OUTPUT_DIR}"
-       /bin/rm -rf ${OUTPUT_DIR}
-    fi
+    # Clean up: remove build output
+    /bin/rm -rf ${OUTPUT_DIR}
 
     END_TIME=`date +%s`
     BUILD_TIME=$(( $END_TIME - $START_TIME ))
