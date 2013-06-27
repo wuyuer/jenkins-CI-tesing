@@ -1,6 +1,11 @@
 #!/bin/bash
 
-TOOLS_DIR=/work/kernel/tools/
+LINK=`readlink $0`
+if [[ ${LINK} ]]; then
+  TOOLS_DIR=`dirname $LINK`
+else
+  TOOLS_DIR=`dirname $0`
+fi
 
 # Command-line options
 QUIET=0
@@ -15,7 +20,7 @@ ARCH=${1:-arm}
 defconfig=${2:-defconfig}
 
 if [[ -z ${CROSS_COMPILE} ]]; then
-   . ${TOOLS_DIR}cross-env.sh $ARCH
+   . ${TOOLS_DIR}/cross-env.sh $ARCH
 fi
 
 # Base options for make
