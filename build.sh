@@ -57,6 +57,8 @@ if [[ ${CCACHE} ]]; then
 fi
 
 RESULT="PASS"
+WARN=0
+SECT=0
 
 # Redirect stdout ( > ) into a named pipe ( >() ) running "tee"
 if [ $QUIET -eq 1 ]; then
@@ -94,11 +96,11 @@ function do_report {
     BUILD_TIME=$(( $END_TIME - $START_TIME ))
 
     echo 
-    echo "Result: ${ARCH}-${defconfig}: ${RESULT} # Build time: ${BUILD_TIME} seconds."
+    echo "Result: ${ARCH}-${defconfig}: ${RESULT} # ${WARN} warnings, ${SECT} mismatches; Built in ${BUILD_TIME} sec"
     echo
 
     if [ $QUIET -eq 1 ]; then
-	echo $ARCH-$defconfig $RESULT $BUILD_TIME | awk '{ printf "Result: %32s: %s # Build time: %4d sec\n", $1, $2, $3}' > /dev/tty
+	echo $ARCH-$defconfig $RESULT $WARN $SECT $BUILD_TIME | awk '{ printf "%32s: %s # %3s warnings, %2s mismatches, %4d sec\n", $1, $2, $3, $4, $5}' > /dev/tty
     fi
 
     exit $1;
@@ -156,6 +158,10 @@ if [ -e ${OUTPUT_DIR}/.config ]; then
 	do_make modules_install
     fi
 fi
+
+# Check warnings
+WARN=`grep -i warning ${BUILD_LOG} | wc -l`
+SECT=`grep -i "Section Mismatch" ${BUILD_LOG}| wc -l`
 
 retval=0
 if [ $RESULT = "FAIL" ]; then
