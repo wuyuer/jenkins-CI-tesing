@@ -119,6 +119,7 @@ function do_make {
 (set -x; ${CROSS_COMPILE}gcc --version)
 
 if [[ ${CCACHE} ]]; then
+   ${CCACHE} --max-size=4G
    (set -x; ${CCACHE} --zero-stats)
 fi
 
