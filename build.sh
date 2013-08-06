@@ -33,9 +33,7 @@ MAKE_OPTS+="-k -j${MAKE_THREADS} "
 # Output dir and build logs
 DATE=`date +%Y%m%d.%H%M%S`
 GIT_HASH=`git log -n1 --abbrev=8 --format=%h`
-if [[ ${TMPDIR} ]]; then
-  OUTPUT_TOP="${TMPDIR}/build-${GIT_HASH}"
-else
+if [[ -z ${OUTPUT_TOP} ]]; then
   OUTPUT_TOP="${PWD}/build-${GIT_HASH}"
 fi
 

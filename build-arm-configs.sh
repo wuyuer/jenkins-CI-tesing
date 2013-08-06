@@ -13,6 +13,11 @@ RESULTS_FAIL=()
 DEFCONFIGS='allnoconfig '
 DEFCONFIGS+=`(cd arch/arm/configs; echo *_defconfig)`
 
+GIT_HASH=`git log -n1 --abbrev=8 --format=%h`
+export OUTPUT_TOP="/run/shm/build-${GIT_HASH}"
+
+echo -n "Build started: "
+date
 for defconfig in $DEFCONFIGS; do
   ${TOOLS}/build.sh --quiet arm ${defconfig}
   if [ $? = 0 ]; then
