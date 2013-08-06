@@ -31,10 +31,11 @@ MAKE_THREADS=$[CPUS * 2]
 MAKE_OPTS+="-k -j${MAKE_THREADS} "
 
 # Output dir and build logs
-DATE=`date +%Y%m%d.%H%M%S`
-GIT_HASH=`git log -n1 --abbrev=8 --format=%h`
+if [[ -z ${OUTPUT_PREFIX} ]]; then
+  OUTPUT_PREFIX="build-"
+fi
 if [[ -z ${OUTPUT_TOP} ]]; then
-  OUTPUT_TOP="${PWD}/build-${GIT_HASH}"
+  OUTPUT_TOP="${PWD}/${OUTPUT_PREFIX}$(git describe)"
 fi
 
 OUTPUT_BASE=${OUTPUT_TOP}/${ARCH}-${defconfig}
