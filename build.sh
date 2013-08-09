@@ -90,6 +90,8 @@ function do_report {
 
     # Clean up: remove build output
     /bin/rm -rf ${OUTPUT_DIR}
+    /bin/rm -f PASS FAIL
+    touch ${OUTPUT_BASE}/${RESULT}
 
     END_TIME=`date +%s`
     BUILD_TIME=$(( $END_TIME - $START_TIME ))
