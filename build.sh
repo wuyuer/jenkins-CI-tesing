@@ -52,6 +52,7 @@ if [[ ${CCACHE} ]]; then
   if [[ -z ${CCACHE_DIR} ]]; then
      export CCACHE_DIR=${OUTPUT_TOP}/ccache
      mkdir -p ${CCACHE_DIR}
+     ${CCACHE} --max-size=8G
   fi
 fi
 
@@ -122,7 +123,6 @@ function do_make {
 (set -x; ${CROSS_COMPILE}gcc --version)
 
 if [[ ${CCACHE} ]]; then
-   ${CCACHE} --max-size=4G
    (set -x; ${CCACHE} --zero-stats)
 fi
 
