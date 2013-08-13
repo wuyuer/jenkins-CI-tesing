@@ -18,6 +18,12 @@ done
 
 ARCH=${1:-arm}
 defconfig=${2:-defconfig}
+defconfig_prefix=$(dirname $defconfig)
+defconfig=$(basename $defconfig)
+if [ $defconfig_prefix == '.' ]; then 
+    defconfig_prefix=''
+fi
+fragments=${@:3}
 
 if [[ -z ${CROSS_COMPILE} ]]; then
    . ${TOOLS_DIR}/cross-env.sh $ARCH
@@ -52,7 +58,7 @@ if [[ ${CCACHE} ]]; then
   if [[ -z ${CCACHE_DIR} ]]; then
      export CCACHE_DIR=${OUTPUT_TOP}/ccache
      mkdir -p ${CCACHE_DIR}
-     ${CCACHE} --max-size=8G
+     ${CCACHE} --max-size=16G
   fi
 fi
 
@@ -109,7 +115,7 @@ function do_report {
 }
 
 function do_make {
-    (set -x; eval make ${MAKE_OPTS} $@)
+    (set -x; eval make ${MAKE_OPTS} $*)
     retval=$?
     if [ $retval != 0 ]; then
 	RESULT="FAIL"
@@ -129,7 +135,20 @@ fi
 START_TIME=`date +%s`
 
 # Configure
-do_make ${defconfig}
+# if no fragments, and no path, just 'make <defconfig>
+# else, use merge_config.sh
+if [[ -n ${defconfig_prefix} ]]; then
+    defconfig_full=${defconfig_prefix}/${defconfig}
+else
+    defconfig_full=arch/${ARCH}/configs/${defconfig}
+fi
+if [ ! -e ${defconfig_full} ]; then
+   do_make ${defconfig}
+else
+  (set -x; ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE} ./scripts/kconfig/merge_config.sh -O ${OUTPUT_DIR} ${defconfig_full} ${fragments})
+fi
+
+do_make oldconfig
 cp ${OUTPUT_DIR}/.config ${OUTPUT_BASE}/kernel.config
 
 # Build kernel
