@@ -35,8 +35,6 @@ def uniqify(d):
 
 # Parse the logs
 for build in os.listdir(dir):
-    if not '-' in build:
-        continue
 
     buildlog = os.path.join(dir, build, log)
     # Ignore build dirs with no build log
@@ -182,6 +180,7 @@ for build in report:
             for m in mismatches:
                 print '\t', m
 
+print
 
 # Any errors means we should report failure
 retval = 0
