@@ -17,13 +17,26 @@ while :; do
 done
 
 ARCH=${1:-arm}
-defconfig=${2:-defconfig}
-defconfig_prefix=$(dirname $defconfig)
-defconfig=$(basename $defconfig)
+defconfig_full=${2:-defconfig}
+
+defconfig_simple=0
+defconfig_prefix=$(dirname $defconfig_full)
 if [ $defconfig_prefix == '.' ]; then 
     defconfig_prefix=''
+    defconfig_simple=1
+    defconfig=$(basename $defconfig_full)
+else
+    # Handle defconfig + fragments
+    OIFS=${IFS}
+    IFS='+'
+    defconfig_frags=($defconfig_full)
+    IFS=${OIFS}
+
+    for frag in ${defconfig_frags[@]}; do
+	combined+="$(basename $frag)+"
+    done
+    defconfig="${combined%?}"  # drop trailing ','
 fi
-fragments=${@:3}
 
 if [[ -z ${CROSS_COMPILE} ]]; then
    . ${TOOLS_DIR}/cross-env.sh $ARCH
@@ -135,20 +148,12 @@ fi
 START_TIME=`date +%s`
 
 # Configure
-# if no fragments, and no path, just 'make <defconfig>
-# else, use merge_config.sh
-if [[ -n ${defconfig_prefix} ]]; then
-    defconfig_full=${defconfig_prefix}/${defconfig}
+if [[ ${defconfig_simple} == 1 ]]; then
+    do_make ${defconfig}
 else
-    defconfig_full=arch/${ARCH}/configs/${defconfig}
-fi
-if [ ! -e ${defconfig_full} ]; then
-   do_make ${defconfig}
-else
-  (set -x; ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE} ./scripts/kconfig/merge_config.sh -O ${OUTPUT_DIR} ${defconfig_full} ${fragments})
+    (set -x; ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE} ./scripts/kconfig/merge_config.sh -O ${OUTPUT_DIR} ${defconfig_frags[@]})
 fi
 
-do_make oldconfig
 cp ${OUTPUT_DIR}/.config ${OUTPUT_BASE}/kernel.config
 
 # Build kernel
