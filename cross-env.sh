@@ -38,6 +38,8 @@ arch=`echo ${tool[$1]} | cut -d' ' -f1`
 cross=`echo ${tool[$1]} | cut -s -d' ' -f2`
 cross_path=`echo ${tool[$1]} | cut -s -d' ' -f3`
 
+export ARCH=$arch
+
 CROSS_COMPILE=
 if [[ ${cross} ]]; then
   CROSS_PATH=${cross_path:="/opt/local/gcc-${GCC_VER}-nolibc/${cross}/bin/"}
