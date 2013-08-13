@@ -18,7 +18,7 @@ if len(sys.argv) < 1:
 
 dir = sys.argv[1]
 base = os.path.dirname(dir)
-if base == '.':
+if base == '.' or base == '':
     base = os.getcwd()
 
 if not os.path.exists(dir):
