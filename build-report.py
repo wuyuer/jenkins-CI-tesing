@@ -1,18 +1,25 @@
 #!/usr/bin/env python
-
+#
+# Usage: build-report <base>
+# 
+#   Where <base> is the root directory containing all the build output
+#
 import os, sys, subprocess
 
 log = 'build.log'
 sep = '-------------------------------------------------------------------------------'
 
+def usage():
+    print "Usage: %s <base>" %(sys.argv[0])
+
 if len(sys.argv) < 1:
-    base = '/work/kernel/jenkins/jobs/kernel-flex/workspace'
-    prefix = 'build-'
-    rev = subprocess.check_output('git describe', shell=True)[:-1]
-    dir = os.path.join(base, prefix + rev)
-else:
-    dir = sys.argv[1]
-    base = os.path.dirname(dir)
+    usage()
+    sys.exit(1)
+
+dir = sys.argv[1]
+base = os.path.dirname(dir)
+if base == '.':
+    base = os.getcwd()
 
 if not os.path.exists(dir):
     print "ERROR: %s does not exist" %dir
@@ -33,6 +40,12 @@ def uniqify(d):
     l.reverse()
     return l
 
+def remove_prefix(arr, base):
+    """Remove string <base> from beginning of each array element"""
+    for i in range(len(arr)):
+        if arr[i].find(base, 0) == 0:
+            arr[i] = arr[i][len(base) + 1:]
+
 # Parse the logs
 for build in os.listdir(dir):
 
@@ -51,18 +64,18 @@ for build in os.listdir(dir):
         pass_fail = 'FAIL'
         fail_count += 1
         
-    err_cmd = 'fgrep -i error: %s | ' \
-        'sed "s@.*%s/@@g"' %(buildlog, base)
+    err_cmd = 'fgrep -i error: %s | cat' %buildlog
     errors = subprocess.check_output(err_cmd, shell=True).splitlines()
+    remove_prefix(errors, base)
     for e in errors:
         errors_all[e] = errors_all.setdefault(e, 0) + 1
 
     warn_cmd = 'fgrep warning: %s | ' \
         'fgrep -v "TODO: return_address should use unwind tables" | ' \
         'fgrep -v "NPTL on non MMU needs fixing" | ' \
-        'fgrep -v "Sparse checking disabled for this file" | ' \
-        'sed "s@.*%s/@@g"' %(buildlog, base)
+        'fgrep -v "Sparse checking disabled for this file" | cat' %buildlog
     warnings = subprocess.check_output(warn_cmd, shell=True).splitlines()
+    remove_prefix(warnings, base)
     for w in warnings:  
         warnings_all[w] = warnings_all.setdefault(w, 0)  + 1
 
