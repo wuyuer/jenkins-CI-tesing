@@ -64,9 +64,18 @@ for build in os.listdir(dir):
         pass_fail = 'FAIL'
         fail_count += 1
         
-    err_cmd = 'fgrep -i error: %s | cat' %buildlog
+    # Error messages, strip of the path prefix
+    err_cmd = 'fgrep error: %s | cat' %buildlog
     errors = subprocess.check_output(err_cmd, shell=True).splitlines()
     remove_prefix(errors, base)
+
+    # Some errors start with ERROR:
+    # DTB compiler gives 'ERROR' (without trailing :)
+    err_cmd = 'grep ^ERROR %s | cat' %buildlog
+    errors2 = subprocess.check_output(err_cmd, shell=True).splitlines()
+    for e in errors2:
+        errors.append(e)
+
     for e in errors:
         errors_all[e] = errors_all.setdefault(e, 0) + 1
 
