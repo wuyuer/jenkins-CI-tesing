@@ -16,10 +16,8 @@ if len(sys.argv) < 1:
     usage()
     sys.exit(1)
 
-dir = sys.argv[1]
-base = os.path.dirname(dir)
-if base == '.' or base == '':
-    base = os.getcwd()
+dir = os.path.abspath(sys.argv[1])
+base = os.path.abspath(os.path.dirname(dir))
 
 if not os.path.exists(dir):
     print "ERROR: %s does not exist" %dir
