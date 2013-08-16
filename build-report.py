@@ -109,7 +109,8 @@ mismatch_count = len(mismatches)
 # Print report
 if os.path.exists('.git'):
     describe = subprocess.check_output('git describe', shell=True)
-    commit = subprocess.check_output('git log -n1 --format=%H', shell=True)
+    commit = subprocess.check_output('git log -n1 --oneline --abbrev=10',
+                                     shell=True)
     timestamp = subprocess.check_output('date')
     print 'Git describe:', describe,
     print 'Commit:', commit,
