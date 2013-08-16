@@ -63,7 +63,7 @@ for build in os.listdir(dir):
         fail_count += 1
         
     # Error messages, strip of the path prefix
-    err_cmd = 'fgrep error: %s | cat' %buildlog
+    err_cmd = 'grep [Ee]rror: %s | cat' %buildlog
     errors = subprocess.check_output(err_cmd, shell=True).splitlines()
     remove_prefix(errors, base)
 
