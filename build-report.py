@@ -5,9 +5,10 @@
 #   Where <base> is the root directory containing all the build output
 #
 import os, sys, subprocess
+import tempfile
 
 log = 'build.log'
-sep = '-------------------------------------------------------------------------------'
+sep = '-' * 79
 
 def usage():
     print "Usage: %s <base>" %(sys.argv[0])
@@ -106,15 +107,44 @@ warning_count = len(warns)
 mismatches = uniqify(mismatch_all)
 mismatch_count = len(mismatches)
 
-# Print report
+report_header = 'report_header.txt'  # Created by Jenkins for tree/branch info
+try:
+    f = open(report_header, 'r')
+    line = f.readline().rstrip()
+    if line.startswith('Tree/Branch:'):
+        (key, val) = line.split(':')
+        tree_branch = val.strip()
+except IOError:
+    tree_branch = None
+
 if os.path.exists('.git'):
-    describe = subprocess.check_output('git describe', shell=True)
+    describe = subprocess.check_output('git describe', shell=True).rstrip()
     commit = subprocess.check_output('git log -n1 --oneline --abbrev=10',
                                      shell=True)
-    timestamp = subprocess.check_output('date')
-    print 'Git describe:', describe,
-    print 'Commit:', commit,
-    print 'Timestamp:', timestamp
+
+#
+#  Log to a file as well as stdout (for sending with msmtp)
+#
+mail_to = "khilman@linaro.org"
+maillog = tempfile.mktemp(suffix='.log', prefix='build-report')
+mail_headers = """From: khilman builder <khilman+build@linaro.org>
+To: %s
+Subject: build %s: %d errors %d warnings %d mismatches (%s)
+
+""" %(mail_to, tree_branch, error_count, warning_count, mismatch_count, describe)
+if maillog:
+    sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0) # Unbuffer output
+    tee = subprocess.Popen(["tee", "%s" %maillog], stdin=subprocess.PIPE)
+    os.dup2(tee.stdin.fileno(), sys.stdout.fileno())
+    os.dup2(tee.stdin.fileno(), sys.stderr.fileno())
+    print mail_headers
+
+# Print report
+if tree_branch:
+    print 'Tree/Branch:', tree_branch
+if os.path.exists('.git'):
+    print 'Git describe:', describe
+    print 'Commit:', commit
 
 formatter = "{:6.2f}"
 print "Passed: %3d / %d   (%6.2f %%)" \
@@ -175,9 +205,12 @@ if mismatch_count:
     for m in mismatches:
         print "\t%3d %s" %(m[0], m[1])
 
-# per-build report
+print "\n" * 4
+print "=" * 79
+print "Detailed per-defconfig build reports below:"
 print
-print "per-defconfig results:"
+
+# per-build report
 for build in report:
     pass_fail = report[build][0]
     errors = report[build][1]
@@ -211,7 +244,10 @@ for build in report:
 
 print
 
-# Any errors means we should report failure
+# Mail the final report
+if maillog and mail_to:
+    subprocess.check_output('cat %s | msmtp -t --' %maillog, shell=True)
+
 retval = 0
 if fail_count:
     retval = 1
