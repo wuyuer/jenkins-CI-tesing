@@ -164,9 +164,9 @@ fi
 do_make ${target}
 
 if [ ${ARCH} = arm ]; then
-    (cd ${OUTPUT_DIR}; cp -a System.map arch/arm/boot/zImage ${OUTPUT_BASE})
-    mkdir -p ${OUTPUT_BASE}/dts
-    cp -a ${OUTPUT_DIR}/arch/arm/boot/dts/*.dtb ${OUTPUT_BASE}/dts
+    (cd ${OUTPUT_DIR}; cp -a System.map ${OUTPUT_BASE})
+    mkdir -p ${OUTPUT_BASE}/arch/arm
+    cp -r ${OUTPUT_DIR}/arch/arm/boot ${OUTPUT_BASE}/arch/arm
 fi
     
 (set -x; ${CROSS_COMPILE}size ${OUTPUT_DIR}/vmlinux)
