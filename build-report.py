@@ -5,19 +5,32 @@
 #   Where <base> is the root directory containing all the build output
 #
 import os, sys, subprocess
-import tempfile
+import tempfile, getopt
 
 log = 'build.log'
 sep = '-' * 79
 
-def usage():
-    print "Usage: %s <base>" %(sys.argv[0])
+mail_to = None
 
-if len(sys.argv) < 1:
+def usage():
+    print "Usage: %s [-m <email address>] <base>" %(sys.argv[0])
+
+try:
+    opts, args = getopt.getopt(sys.argv[1:], "m:")
+except getopt.GetoptError as err:
+    print str(err)
     usage()
     sys.exit(1)
 
-dir = os.path.abspath(sys.argv[1])
+for o, a in opts:
+    if o == '-m':
+        mail_to = a
+
+if len(args) < 1:
+    usage()
+    sys.exit(1)
+
+dir = os.path.abspath(args[0])
 base = os.path.abspath(os.path.dirname(dir))
 
 if not os.path.exists(dir):
@@ -125,14 +138,13 @@ if os.path.exists('.git'):
 #
 #  Log to a file as well as stdout (for sending with msmtp)
 #
-mail_to = "khilman@linaro.org"
 maillog = tempfile.mktemp(suffix='.log', prefix='build-report')
 mail_headers = """From: khilman builder <khilman+build@linaro.org>
 To: %s
 Subject: build %s: %d errors %d warnings %d mismatches (%s)
 
 """ %(mail_to, tree_branch, error_count, warning_count, mismatch_count, describe)
-if maillog:
+if mail_to and maillog:
     sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0) # Unbuffer output
     tee = subprocess.Popen(["tee", "%s" %maillog], stdin=subprocess.PIPE)
     os.dup2(tee.stdin.fileno(), sys.stdout.fileno())
