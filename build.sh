@@ -71,7 +71,7 @@ if [[ ${CCACHE} ]]; then
   if [[ -z ${CCACHE_DIR} ]]; then
      export CCACHE_DIR=${OUTPUT_TOP}/ccache
      mkdir -p ${CCACHE_DIR}
-     ${CCACHE} --max-size=16G
+     ${CCACHE} --max-size=16G > /dev/null
   fi
 fi
 
