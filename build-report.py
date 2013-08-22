@@ -139,7 +139,7 @@ if os.path.exists('.git'):
 #  Log to a file as well as stdout (for sending with msmtp)
 #
 maillog = tempfile.mktemp(suffix='.log', prefix='build-report')
-mail_headers = """From: khilman builder <khilman+build@linaro.org>
+mail_headers = """From: khilman+build@linaro.org
 To: %s
 Subject: build %s: %d errors %d warnings %d mismatches (%s)
 
