@@ -267,7 +267,9 @@ for build in report_good:
 
 # Mail the final report
 if maillog and mail_to:
+    sys.stdout.flush()
     subprocess.check_output('cat %s | msmtp -t --' %maillog, shell=True)
+    os.remove(maillog)
 
 retval = 0
 if fail_count:
