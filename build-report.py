@@ -38,6 +38,7 @@ if not os.path.exists(dir):
 
 # format: (result, error list, warning list, mismatch list)
 report = {}
+report_good = {}
 
 pass_count = 0
 fail_count = 0
@@ -105,8 +106,11 @@ for build in os.listdir(dir):
     for m in mismatches:
         mismatch_all[m] = mismatch_all.setdefault(m, 0) + 1
 
-    report[build] = (pass_fail, errors, warnings, mismatches)
-
+    if len(errors) or len(warnings) or len(mismatches):
+        report[build] = (pass_fail, errors, warnings, mismatches)
+    else:
+        report_good[build] = (pass_fail, errors, warnings, mismatches)
+        
 
 if total_count == 0:
     print "No builds found."
@@ -217,7 +221,7 @@ if mismatch_count:
     for m in mismatches:
         print "\t%3d %s" %(m[0], m[1])
 
-print "\n" * 4
+print "\n" * 2
 print "=" * 79
 print "Detailed per-defconfig build reports below:"
 print
@@ -254,7 +258,12 @@ for build in report:
             for m in mismatches:
                 print '\t', m
 
+print sep
 print
+print "Passed with no errors, warnings or mismatches:"
+print
+for build in report_good:
+    print build
 
 # Mail the final report
 if maillog and mail_to:
