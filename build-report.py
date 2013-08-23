@@ -124,26 +124,24 @@ warning_count = len(warns)
 mismatches = uniqify(mismatch_all)
 mismatch_count = len(mismatches)
 
-report_header = 'report_header.txt'  # Created by Jenkins for tree/branch info
-try:
-    f = open(report_header, 'r')
-    line = f.readline().rstrip()
-    if line.startswith('Tree/Branch:'):
-        (key, val) = line.split(':')
-        tree_branch = val.strip()
-except IOError:
-    tree_branch = None
+build_time = 0
+if os.path.exists('timestamp.start') and os.path.exists('timestamp.end'):
+    try:
+        t_start = int(open('timestamp.start').readline().rstrip())
+        t_end = int(open('timestamp.end').readline().rstrip())
+        build_time = t_end - t_start
+    except IOError:
+        pass
 
 if os.path.exists('.git'):
     describe = subprocess.check_output('git describe', shell=True).rstrip()
     commit = subprocess.check_output('git log -n1 --oneline --abbrev=10',
-                                     shell=True)
-    if not tree_branch:
-        tree_branch = subprocess.check_output('git describe --all',
-                                              shell=True).rstrip()
-        i = tree_branch.find('/')
-        if i > 0:
-            tree_branch = tree_branch[i+1:]
+                                     shell=True).rstrip()
+    tree_branch = subprocess.check_output('git describe --all',
+                                          shell=True).rstrip()
+    i = tree_branch.find('/')
+    if i > 0:
+        tree_branch = tree_branch[i+1:]
 
 #
 #  Log to a file as well as stdout (for sending with msmtp)
@@ -162,13 +160,15 @@ if mail_to and maillog:
     print mail_headers
 
 # Print report
-if tree_branch:
-    print 'Tree/Branch:', tree_branch
 if os.path.exists('.git'):
+    print 'Tree/Branch:', tree_branch
     print 'Git describe:', describe
     print 'Commit:', commit
+if build_time:
+    print 'Build Time: %d min %d sec' %(build_time/60, build_time%60)
 
 formatter = "{:6.2f}"
+print
 print "Passed: %3d / %d   (%6.2f %%)" \
     %(pass_count, total_count, float(pass_count) / total_count * 100)
 print "Failed: %3d / %d   (%6.2f %%)" \
