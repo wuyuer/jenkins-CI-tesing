@@ -149,7 +149,7 @@ if os.path.exists('.git'):
 maillog = tempfile.mktemp(suffix='.log', prefix='build-report')
 mail_headers = """From: build bot <khilman+build@linaro.org>
 To: %s
-Subject: build %s: %d errors %d warnings %d mismatches (%s)
+Subject: %s build: %d errors %d warnings %d mismatches (%s)
 
 """ %(mail_to, tree_branch, error_count, warning_count, mismatch_count, describe)
 if mail_to and maillog:
