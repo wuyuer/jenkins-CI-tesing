@@ -110,7 +110,7 @@ function do_report {
 
     # Clean up: remove build output
     /bin/rm -rf ${OUTPUT_DIR}
-    /bin/rm -f PASS FAIL
+    /bin/rm -f ${OUTPUT_BASE}/PASS ${OUTPUT_BASE}/FAIL
     touch ${OUTPUT_BASE}/${RESULT}
 
     END_TIME=`date +%s`
