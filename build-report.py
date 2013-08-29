@@ -274,6 +274,7 @@ for build in report_good:
 # Mail the final report
 if maillog and mail_to:
     sys.stdout.flush()
+    tee.stdin.close()
     subprocess.check_output('cat %s | msmtp -t --' %maillog, shell=True)
     os.remove(maillog)
 
