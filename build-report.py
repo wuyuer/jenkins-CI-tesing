@@ -147,12 +147,17 @@ if os.path.exists('.git'):
 #  Log to a file as well as stdout (for sending with msmtp)
 #
 maillog = tempfile.mktemp(suffix='.log', prefix='build-report')
-mail_headers = """From: build bot <khilman+build@linaro.org>
+mail_headers = """From: Kevin Hilman build bot <khilman+build@linaro.org>
 To: %s
-Subject: %s build: %d errors %d warnings %d mismatches (%s)
+Subject: %s build: %d failures %d warnings (%s)
 
-""" %(mail_to, tree_branch, error_count, warning_count, mismatch_count, describe)
+Automated build results for all ARM defconfigs.  Summarizes all build
+errors, warnings and section mismatches followed by a per-defconfig
+summary.
+
+""" %(mail_to, tree_branch, fail_count, warning_count, describe)
 if mail_to and maillog:
+    stdout_save = sys.stdout
     sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0) # Unbuffer output
     tee = subprocess.Popen(["tee", "%s" %maillog], stdin=subprocess.PIPE)
     os.dup2(tee.stdin.fileno(), sys.stdout.fileno())
@@ -274,9 +279,12 @@ for build in report_good:
 # Mail the final report
 if maillog and mail_to:
     sys.stdout.flush()
-    tee.stdin.close()
-    subprocess.check_output('cat %s | msmtp -t --' %maillog, shell=True)
-    os.remove(maillog)
+    sys.stdout = stdout_save
+    subprocess.check_output('cat %s | msmtp --read-envelope-from -t --' %maillog, shell=True)
+    if os.path.exists(maillog):
+        os.remove(maillog)
+    else:
+        print "WARNING: mail log %s doesn't exist!" %maillog
 
 retval = 0
 if fail_count:
