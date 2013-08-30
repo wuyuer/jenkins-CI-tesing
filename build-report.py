@@ -211,6 +211,22 @@ if fail_count:
 print
 print sep
 
+# Issues summary
+print "defconfigs with issues (other than build errors):"
+for build in report:
+    w = report[build][2]
+    m = report[build][3]
+    if not (len(w) or len(m)):
+        continue
+
+    print "%40s: " %build,
+    print "%3d warnings " %len(w),
+    print "%3d mismatches " %len(m),
+    print
+
+print
+print sep
+
 # Errors Summary
 if error_count:
     print
