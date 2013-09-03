@@ -1,41 +1,33 @@
 #!/bin/bash
 
-TOOLS=/work/kernel/tools
+TOOLS=/work/kernel/tools/build-scripts
 
 ARCH=arm
-#DEFCONFIGS=$(cd arch/arm/configs; echo *_defconfig)
 DEFCONFIGS=$(cd arch/arm/configs; echo *_defconfig)
-DEFCONFIGS=omap2plus_defconfig
+#NICE=nice
 
-LOG="report-$(git describe).log"
+BUILD="build-$(git describe)"
+LOG="${BUILD}.log"
 exec > >(tee ${LOG})
 
-# 
-# Build
-#
+# Build (per-defconfig builds under build-$(git describe)
+date +%s > timestamp.start
 for defconfig in ${DEFCONFIGS}; do
-    build.sh ${ARCH} ${defconfig}
-
-    (cd build-$(git describe)/${ARCH}-${defconfig}; ${TOOLS}/boot/boot-tool.py ${defconfig})
-
+    ${NICE} build.sh --quiet ${ARCH} ${defconfig}
 done
+date +%s > timestamp.end
 
-#
+# Build report
+if [ -e ${TOOLS}/build-report.py ]; then
+  ${TOOLS}/build-report.py ${BUILD}
+fi
+
 # Boot
-#
-if [ -e ${TOOLS}/boot/boot-report.py ]; then
-    for defconfig in ${DEFCONFIGS}; do
-	(cd build-$(git describe)/${ARCH}-${defconfig}; \
-	    ${TOOLS}/boot/boot-tool.py ${defconfig})
-    done
-fi
+if [ -e ${TOOLS}/boot-map.py ]; then
+   ${TOOLS}/boot-map.py ${BUILD}
+fi 
 
-#
-# Report
-#
-if [ -e ${TOOLS}/boot/boot-report.py ]; then
-    ${TOOLS}/boot/boot-report.py build-$(git describe)
-fi
-
-${TOOLS}/build-scripts/build-report.py build-$(git describe)
-
+# boot report
+if [ -e ${TOOLS}/boot-report.py ]; then
+   ${TOOLS}/boot-report.py ${BUILD}
+fi 
