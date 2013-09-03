@@ -5,10 +5,17 @@ TOOLS=/work/kernel/tools/build-scripts
 ARCH=arm
 DEFCONFIGS=$(cd arch/arm/configs; echo *_defconfig)
 #NICE=nice
+CCACHE=$(which ccache)
+export CCACHE_DIR=${PWD}/../ccache
 
 BUILD="build-$(git describe)"
 LOG="${BUILD}.log"
 exec > >(tee ${LOG})
+
+if [[ ${CCACHE} ]]; then
+    ccache --max-size=16G > /dev/null
+    ccache --zero-stats > /dev/null
+fi
 
 # Build (per-defconfig builds under build-$(git describe)
 date +%s > timestamp.start
@@ -16,6 +23,10 @@ for defconfig in ${DEFCONFIGS}; do
     ${NICE} build.sh --quiet ${ARCH} ${defconfig}
 done
 date +%s > timestamp.end
+
+if [[ ${CCACHE} ]]; then
+    ccache --show-stats
+fi
 
 # Build report
 if [ -e ${TOOLS}/build-report.py ]; then
