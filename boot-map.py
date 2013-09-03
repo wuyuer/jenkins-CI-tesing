@@ -38,7 +38,8 @@ cwd = os.getcwd()
 retval = 0
 sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0) # Unbuffer output
 for build in os.listdir(dir):
-    (arch, defconfig) = build.split('-', 1)
+    if '-' in build:
+        (arch, defconfig) = build.split('-', 1)
 
     if not defconfig in boot_defconfigs:
         continue
