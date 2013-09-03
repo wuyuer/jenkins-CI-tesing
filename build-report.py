@@ -6,6 +6,7 @@
 #
 import os, sys, subprocess
 import tempfile, getopt
+import util
 
 log = 'build.log'
 sep = '-' * 79
@@ -133,15 +134,7 @@ if os.path.exists('timestamp.start') and os.path.exists('timestamp.end'):
     except IOError:
         pass
 
-if os.path.exists('.git'):
-    describe = subprocess.check_output('git describe', shell=True).rstrip()
-    commit = subprocess.check_output('git log -n1 --oneline --abbrev=10',
-                                     shell=True).rstrip()
-    tree_branch = subprocess.check_output('git describe --all',
-                                          shell=True).rstrip()
-    i = tree_branch.find('/')
-    if i > 0:
-        tree_branch = tree_branch[i+1:]
+(tree_branch, describe, commit) = util.get_header_info(base)
 
 #
 #  Log to a file as well as stdout (for sending with msmtp)
