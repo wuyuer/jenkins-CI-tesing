@@ -72,6 +72,7 @@ if [[ ${CCACHE} ]]; then
      export CCACHE_DIR=${OUTPUT_TOP}/ccache
      mkdir -p ${CCACHE_DIR}
      ${CCACHE} --max-size=16G > /dev/null
+     ${CCACHE} --zero-stats > /dev/null
   fi
 fi
 
@@ -140,10 +141,6 @@ function do_make {
 
 # Show compiler version
 (set -x; ${CROSS_COMPILE}gcc --version)
-
-if [[ ${CCACHE} ]]; then
-   (set -x; ${CCACHE} --zero-stats)
-fi
 
 START_TIME=`date +%s`
 
