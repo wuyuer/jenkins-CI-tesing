@@ -12,6 +12,7 @@ export CCACHE_DIR=${PWD}/.ccache
 BUILD="build-$(git describe)"
 LOG="${BUILD}.log"
 exec > >(tee ${LOG})
+exit 2>&1
 
 if [[ ${CCACHE} ]]; then
     ccache --max-size=16G > /dev/null
@@ -21,7 +22,7 @@ fi
 # Build (per-defconfig builds under build-$(git describe)
 date +%s > timestamp.start
 for defconfig in ${DEFCONFIGS}; do
-    ${NICE} build.sh --quiet ${ARCH} ${defconfig}
+    ${NICE} ${TOOLS}/build.sh --quiet ${ARCH} ${defconfig}
 done
 date +%s > timestamp.end
 
