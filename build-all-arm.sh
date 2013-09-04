@@ -37,9 +37,9 @@ fi
 # Boot
 if [ -e ${TOOLS}/boot-map.py ]; then
    ${TOOLS}/boot-map.py ${BUILD}
-fi 
 
-# boot report
-if [ -e ${TOOLS}/boot-report.py ]; then
-   ${TOOLS}/boot-report.py ${MAIL} ${BUILD}
-fi 
+   # boot report
+   if [ $? == 0 ] && [ -e ${TOOLS}/boot-report.py ]; then
+       ${TOOLS}/boot-report.py ${MAIL} ${BUILD}
+   fi 
+fi
