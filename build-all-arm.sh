@@ -1,6 +1,6 @@
 #!/bin/bash
 
-TOOLS=/work/kernel/tools/build-scripts
+TOOLS=${HOME}/work/kernel/tools/build-scripts
 #MAIL="-m somone@somewhere.org"
 
 ARCH=arm
