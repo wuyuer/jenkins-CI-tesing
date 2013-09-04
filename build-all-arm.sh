@@ -7,7 +7,7 @@ ARCH=arm
 DEFCONFIGS=$(cd arch/arm/configs; echo *_defconfig)
 #NICE=nice
 CCACHE=$(which ccache)
-export CCACHE_DIR=${PWD}/../ccache
+export CCACHE_DIR=${PWD}/.ccache
 
 BUILD="build-$(git describe)"
 LOG="${BUILD}.log"
