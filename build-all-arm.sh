@@ -12,7 +12,7 @@ export CCACHE_DIR=${PWD}/.ccache
 BUILD="build-$(git describe)"
 LOG="${BUILD}.log"
 exec > >(tee ${LOG})
-exit 2>&1
+exec 2>&1
 
 if [[ ${CCACHE} ]]; then
     ccache --max-size=16G > /dev/null
