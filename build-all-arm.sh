@@ -1,6 +1,7 @@
 #!/bin/bash
 
 TOOLS=/work/kernel/tools/build-scripts
+#MAIL="-m somone@somewhere.org"
 
 ARCH=arm
 DEFCONFIGS=$(cd arch/arm/configs; echo *_defconfig)
@@ -30,7 +31,7 @@ fi
 
 # Build report
 if [ -e ${TOOLS}/build-report.py ]; then
-  ${TOOLS}/build-report.py ${BUILD}
+  ${TOOLS}/build-report.py ${MAIL} ${BUILD}
 fi
 
 # Boot
@@ -40,5 +41,5 @@ fi
 
 # boot report
 if [ -e ${TOOLS}/boot-report.py ]; then
-   ${TOOLS}/boot-report.py ${BUILD}
+   ${TOOLS}/boot-report.py ${MAIL} ${BUILD}
 fi 
