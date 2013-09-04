@@ -11,6 +11,12 @@ if [ ! -e ${DIR} ]; then
 fi
 
 cd ${DIR}
+
+if [ -e .build-in-progress ]; then
+  echo "ERROR: build in progress"
+  exit 0
+fi
+
 git status
 if [ $? != 0 ]; then
   echo "ERROR: something strange with git repo"
@@ -31,4 +37,6 @@ if [ -e ${BUILD} ]; then
    exit 0
 fi
 
+touch .build-in-progress
 ${TOOLS}/build-all-arm.sh
+rm -f .build-in-progress
