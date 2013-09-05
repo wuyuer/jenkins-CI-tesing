@@ -1,7 +1,5 @@
 #!/bin/sh
 
-TOOLS=~/work/kernel/tools/build-scripts
-
 DIR=${1:-${HOME}/work/kernel/linux-2.6}
 BRANCH=${2:-master}
 
@@ -38,5 +36,5 @@ if [ -e ${BUILD} ]; then
 fi
 
 touch .build-in-progress
-${TOOLS}/build-all-arm.sh
+build-all-arm.sh
 rm -f .build-in-progress

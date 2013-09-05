@@ -1,7 +1,6 @@
 #!/bin/bash
 
-TOOLS=${HOME}/work/kernel/tools/build-scripts
-#MAIL="-m somone@somewhere.org"
+#MAILTO="-m somone@somewhere.org"
 
 ARCH=arm
 DEFCONFIGS=$(cd arch/arm/configs; echo *_defconfig)
@@ -22,7 +21,7 @@ fi
 # Build (per-defconfig builds under build-$(git describe)
 date +%s > timestamp.start
 for defconfig in ${DEFCONFIGS}; do
-    ${NICE} ${TOOLS}/build.sh --quiet ${ARCH} ${defconfig}
+    ${NICE} build.sh --quiet ${ARCH} ${defconfig}
 done
 date +%s > timestamp.end
 
@@ -31,16 +30,13 @@ if [[ ${CCACHE} ]]; then
 fi
 
 # Build report
-if [ -e ${TOOLS}/build-report.py ]; then
-  ${TOOLS}/build-report.py ${MAIL} ${BUILD}
-fi
+build-report.py ${MAILTO} ${BUILD}
 
 # Boot
-if [ -e ${TOOLS}/boot-map.py ]; then
-   ${TOOLS}/boot-map.py ${BUILD}
-
-   # boot report
-   if [ $? == 0 ] && [ -e ${TOOLS}/boot-report.py ]; then
-       ${TOOLS}/boot-report.py ${MAIL} ${BUILD}
-   fi 
+which pyboot
+if [ $? == 0 ]; then
+    # Boot test
+    boot-map.py ${BUILD}
+    # boot report
+    boot-report.py ${MAILTO} ${BUILD}
 fi
