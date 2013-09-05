@@ -63,7 +63,7 @@ for build in os.listdir(dir):
                 logfile = "boot-%s,%s.log" %(d, board)
             else:
                 logfile = "boot-%s.log" %d
-            cmd = '/work/kernel/tools/pyboot/pyboot -s -l %s %s %s %s' \
+            cmd = 'pyboot -s -l %s %s %s %s' \
                 %(logfile, board, zImage, dtb_l)
             r = subprocess.call(cmd, shell=True)
             if r != 0:
