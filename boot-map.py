@@ -26,8 +26,7 @@ board_map = {
     'sun4i-a10-cubieboard.dtb': ('cubie', ),
     
     # i.MX
-    #'imx6dl-wandboard.dtb': ('wand-solo', 'wand-dual', ),
-    'imx6dl-wandboard.dtb': ('wand-dual', ),
+    'imx6dl-wandboard.dtb': ('wand-solo', 'wand-dual', ),
     'imx6q-wandboard.dtb': ('wand-quad', ),
     }
 
