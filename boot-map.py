@@ -13,7 +13,7 @@ boot_defconfigs = (
 board_map = {
     # OMAP
     'am335x-bone.dtb': ('am335xbone', ),
-    'am335x-boneblack.dtb': ('am335xboneb', )
+    'am335x-boneblack.dtb': ('am335xboneb', ),
     'omap3-beagle.dtb': ('3530beagle', ),
     'omap3-beagle-xm.dtb': ('3730xm', ),
     'omap3-tobi.dtb': ('3530overo', '3730storm'),
