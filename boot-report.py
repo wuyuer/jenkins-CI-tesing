@@ -69,6 +69,10 @@ for build in os.listdir(dir):
     if len(boards) > 0:
         builds[build] = (boards, build_fail_count, build_pass_count)
 
+# Don't send mail if there were no builds
+if len(builds) == 0:
+    print "WARNING: No boot logs found, Giving up."
+    sys.exit(1)
 
 # Extract tree/branch from report header
 (tree_branch, describe, commit) = util.get_header_info(base)
