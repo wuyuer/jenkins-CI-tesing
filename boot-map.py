@@ -8,6 +8,7 @@ boot_defconfigs = (
     'exynos_defconfig',
     'multi_v7_defconfig',
     'imx_v6_v7_defconfig',
+    'sama5_defconfig',
 )
 
 board_map = {
