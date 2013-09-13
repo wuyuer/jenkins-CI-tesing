@@ -58,8 +58,9 @@ if [[ -z ${OUTPUT_TOP} ]]; then
 fi
 
 OUTPUT_BASE=${OUTPUT_TOP}/${ARCH}-${defconfig}
-OUTPUT_DIR=${OUTPUT_BASE}/output
+OUTPUT_DIR=${PWD}/build-output/${ARCH}-${defconfig}
 BUILD_LOG=${OUTPUT_BASE}/build.log
+mkdir -p ${OUTPUT_BASE}
 mkdir -p ${OUTPUT_DIR}
 MAKE_OPTS+="O=${OUTPUT_DIR} "
 
@@ -69,9 +70,9 @@ fi
 if [[ ${CCACHE} ]]; then
   MAKE_OPTS+="CC=\"ccache ${CROSS_COMPILE}gcc\" "
   if [[ -z ${CCACHE_DIR} ]]; then
-     export CCACHE_DIR=${OUTPUT_TOP}/ccache
+     export CCACHE_DIR=${OUTPUT_DIR}/ccache
      mkdir -p ${CCACHE_DIR}
-     ${CCACHE} --max-size=16G > /dev/null
+     #${CCACHE} --max-size=16G > /dev/null
      ${CCACHE} --zero-stats > /dev/null
   fi
 fi
@@ -110,7 +111,7 @@ function do_report {
     fi
 
     # Clean up: remove build output
-    /bin/rm -rf ${OUTPUT_DIR}
+    #/bin/rm -rf ${OUTPUT_DIR}
     /bin/rm -f ${OUTPUT_BASE}/PASS ${OUTPUT_BASE}/FAIL
     touch ${OUTPUT_BASE}/${RESULT}
 
