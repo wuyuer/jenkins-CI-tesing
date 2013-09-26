@@ -10,6 +10,7 @@ boot_defconfigs = (
     'imx_v6_v7_defconfig',
     'sama5_defconfig',
     'mvebu_defconfig',
+    'tegra_defconfig',
 )
 
 board_map = {
@@ -37,6 +38,9 @@ board_map = {
 
     # Marvell
     'armada-370-mirabox.dtb': ('mirabox', ),
+
+    # Tegra
+    'tegra30-beaver.dtb': ('beaver', ),
     }
 
 dir = os.path.abspath(sys.argv[1])
