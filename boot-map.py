@@ -9,6 +9,7 @@ boot_defconfigs = (
     'multi_v7_defconfig',
     'imx_v6_v7_defconfig',
     'sama5_defconfig',
+    'mvebu_defconfig',
 )
 
 board_map = {
@@ -32,9 +33,11 @@ board_map = {
     'imx6q-wandboard.dtb': ('wand-quad', ),
 
     # atmel
-    'sama5d35ek.dtb': ('sama5d3x', ),
-    }
+    'sama5d35ek.dtb': ('sama5', ),
 
+    # Marvell
+    'armada-370-mirabox.dtb': ('mirabox', ),
+    }
 
 dir = os.path.abspath(sys.argv[1])
 base = os.path.dirname(dir)
