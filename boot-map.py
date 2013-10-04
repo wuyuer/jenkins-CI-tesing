@@ -11,6 +11,7 @@ boot_defconfigs = (
     'sama5_defconfig',
     'mvebu_defconfig',
     'tegra_defconfig',
+    'u8500_defconfig',
 )
 
 board_map = {
@@ -28,7 +29,7 @@ board_map = {
 
     # sunxi
     'sun4i-a10-cubieboard.dtb': ('cubie', ),
-    
+
     # i.MX
     'imx6dl-wandboard.dtb': ('wand-solo', 'wand-dual', ),
     'imx6q-wandboard.dtb': ('wand-quad', ),
@@ -38,9 +39,13 @@ board_map = {
 
     # Marvell
     'armada-370-mirabox.dtb': ('mirabox', ),
+    'armada-xp-openblocks-ax3-4.dtb': ('openblocks', ),
 
     # Tegra
     'tegra30-beaver.dtb': ('beaver', ),
+
+    # u8500
+    'ste-snowball.dtb': ('snowball', ),
     }
 
 dir = os.path.abspath(sys.argv[1])
