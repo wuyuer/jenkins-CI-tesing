@@ -39,7 +39,7 @@ board_map = {
 
     # Marvell
     'armada-370-mirabox.dtb': ('mirabox', ),
-    'armada-xp-openblocks-ax3-4.dtb': ('openblocks', ),
+    'armada-xp-openblocks-ax3-4.dtb': ('obsax3', ),
 
     # Tegra
     'tegra30-beaver.dtb': ('beaver', ),
