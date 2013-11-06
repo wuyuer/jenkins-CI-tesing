@@ -14,7 +14,7 @@ ALLTARGETS := $(patsubst arch/${ARCH}/configs/%,build-%,$(ALLCONFIGS))
 
 CONFIG_OVERRIDES="CONFIG_DEBUG_SECTION_MISMATCH=y"
 
-.PHONY: all buildall buildall_setup
+.PHONY: all buildall ccache_setup
 
 all: buildall
 
@@ -31,7 +31,10 @@ build-%: build/%
 	else \
 		touch $</FAIL; \
 		RES=failed; \
-        fi ;
+        fi ; \
+	WARN=`grep -i warning: $</build.log | fgrep -v "TODO: return_address should use unwind tables" | wc -l` ; \
+	SECT=`grep "Section mismatch" $</build.log | wc -l` ; \
+	printf "   %-25s  %s, %3s warnings, %2s section mismatches\n" $(CFG) $$RES $$WARN $$SECT 
 	@test -f $</vmlinux
 
 clean-%: build/%
@@ -42,9 +45,9 @@ clean-%: build/%
 cleanall: $(patsubst build-%,clean-%,$(ALLTARGETS))
 	@
 
-buildall_setup:
+ccache_setup:
 	@ccache --max-size=16G > /dev/null 2>&1
 	@ccache --zero-stats > /dev/null 2>&1
 
-buildall: buildall_setup $(ALLTARGETS)
+buildall: ccache_setup $(ALLTARGETS)
 	@ccache --show-stats
