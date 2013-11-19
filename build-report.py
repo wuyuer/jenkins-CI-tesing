@@ -289,7 +289,7 @@ for build in report_good:
 if maillog and mail_to:
     sys.stdout.flush()
     sys.stdout = stdout_save
-    subprocess.check_output('cat %s | msmtp --read-envelope-from -t --' %maillog, shell=True)
+#    subprocess.check_output('cat %s | msmtp --read-envelope-from -t --' %maillog, shell=True)
     if os.path.exists(maillog):
         os.remove(maillog)
     else:

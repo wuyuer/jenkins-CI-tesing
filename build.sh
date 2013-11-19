@@ -111,7 +111,7 @@ function do_report {
     fi
 
     # Clean up: remove build output
-    #/bin/rm -rf ${OUTPUT_DIR}
+    /bin/rm -rf ${OUTPUT_DIR}
     /bin/rm -f ${OUTPUT_BASE}/PASS ${OUTPUT_BASE}/FAIL
     touch ${OUTPUT_BASE}/${RESULT}
 

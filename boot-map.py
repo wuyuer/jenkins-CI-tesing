@@ -18,7 +18,7 @@ board_map = {
     # OMAP
     'am335x-bone.dtb': ('am335xbone', ),
     'am335x-boneblack.dtb': ('am335xboneb', ),
-    'omap3-beagle.dtb': ('3530beagle', ),
+#    'omap3-beagle.dtb': ('3530beagle', ),
     'omap3-beagle-xm.dtb': ('3730xm', ),
     'omap3-tobi.dtb': ('3530overo', '3730storm'),
     'omap4-panda.dtb': ('4430panda', ),
@@ -28,7 +28,8 @@ board_map = {
     'exynos5250-arndale.dtb': ('arndale', ),
 
     # sunxi
-    'sun4i-a10-cubieboard.dtb': ('cubie', ),
+#    'sun4i-a10-cubieboard.dtb': ('cubie', ),
+    'sun7i-a20-cubieboard2.dtb': ('cubie2', ),
 
     # i.MX
     'imx6dl-wandboard.dtb': ('wand-solo', 'wand-dual', ),
@@ -54,13 +55,18 @@ cwd = os.getcwd()
 retval = 0
 sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0) # Unbuffer output
 for build in os.listdir(dir):
+    path = os.path.join(dir, build)
+
+    if not os.path.isdir(path):
+        continue
+
+    defconfig = build
     if '-' in build:
         (arch, defconfig) = build.split('-', 1)
 
     if not defconfig in boot_defconfigs:
         continue
 
-    path = os.path.join(dir, build)
     for dtb_path in glob.glob('%s/arch/arm/boot/dts/*.dtb' %path):
         dtb = os.path.basename(dtb_path)
 

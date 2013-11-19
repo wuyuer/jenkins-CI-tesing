@@ -4,19 +4,22 @@ import os, sys, subprocess, glob
 import tempfile, getopt
 import util
 
+maillog = None
 mail_to = None
 
 def usage():
     print "Usage: %s [-m <email address>] <base>" %(sys.argv[0])
 
 try:
-    opts, args = getopt.getopt(sys.argv[1:], "m:")
+    opts, args = getopt.getopt(sys.argv[1:], "m:l:")
 except getopt.GetoptError as err:
     print str(err)
     usage()
     sys.exit(1)
 
 for o, a in opts:
+    if o == '-l':
+        maillog = a
     if o == '-m':
         mail_to = a
 
@@ -83,27 +86,28 @@ sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)
 #
 #  Log to a file as well as stdout (for sending with msmtp)
 #
-maillog = tempfile.mktemp(suffix='.log', prefix='boot-report')
-mail_headers = """From: Kevin Hilman build bot <khilman+build@linaro.org>
+if not maillog:
+    maillog = tempfile.mktemp(suffix='.log', prefix='boot-report')
+mail_headers = """From: Kevin's boot bot <khilman+build@linaro.org>
 To: %s
 Subject: %s boot: %d pass, %d fail (%s)
 
 Automated DT boot report for various ARM defconfigs.  
 
-Boot test simply checks if kernel can boot to initramfs with busybox
-and run some basic commands (e.g. 'cat /proc/cpuinfo').
-
 """ %(mail_to, tree_branch, total_pass_count, total_fail_count, describe)
-if mail_to and maillog:
+if maillog:
     stdout_save = sys.stdout
     tee = subprocess.Popen(["tee", "%s" %maillog], stdin=subprocess.PIPE)
     os.dup2(tee.stdin.fileno(), sys.stdout.fileno())
     os.dup2(tee.stdin.fileno(), sys.stderr.fileno())
     print mail_headers
 
-print 'Tree/Branch:', tree_branch
-print 'Git describe:', describe
-print 'Commit:', commit
+if tree_branch:
+    print 'Tree/Branch:', tree_branch
+if describe:
+    print 'Git describe:', describe
+if commit:
+    print 'Commit:', commit
 
 # Failure summary
 if total_fail_count:
@@ -186,6 +190,7 @@ if maillog and mail_to:
     sys.stdout = stdout_save
     subprocess.check_output('cat %s | msmtp --read-envelope-from -t --' %maillog, shell=True)
     if os.path.exists(maillog):
-        os.remove(maillog)
+        if maillog.startswith('/tmp'):
+            os.remove(maillog)
     else:
         print "WARNING: mail log %s doesn't exist!" %maillog
