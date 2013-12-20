@@ -154,12 +154,7 @@ fi
 
 cp ${OUTPUT_DIR}/.config ${OUTPUT_BASE}/kernel.config
 
-# Build kernel
-if [ ${ARCH} = arm ]; then
-    target="zImage dtbs"
-fi
-
-do_make ${target}
+do_make
 
 if [ ${ARCH} = arm ]; then
     (cd ${OUTPUT_DIR}; cp -a System.map ${OUTPUT_BASE})
