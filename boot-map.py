@@ -53,6 +53,7 @@ dir = os.path.abspath(sys.argv[1])
 base = os.path.dirname(dir)
 cwd = os.getcwd()
 retval = 0
+
 sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0) # Unbuffer output
 for build in os.listdir(dir):
     path = os.path.join(dir, build)
@@ -66,16 +67,22 @@ for build in os.listdir(dir):
 
     if not defconfig in boot_defconfigs:
         continue
+    
+    zImage = 'zImage'
+    dtb_base = 'dtbs'
+    if os.path.exists(os.path.join(path, 'arch/arm/boot')):
+        zImage = os.path.join('arch/arm/boot', 'zImage')
+        dtb_base = 'arch/arm/boot/dts'
 
-    for dtb_path in glob.glob('%s/arch/arm/boot/dts/*.dtb' %path):
+    for dtb_path in glob.glob('%s/%s/*.dtb' %(path, dtb_base)):
         dtb = os.path.basename(dtb_path)
 
         if not board_map.has_key(dtb):
             continue
 
         boards = board_map[dtb]
-        zImage = os.path.join('arch/arm/boot', 'zImage')
-        dtb_l = os.path.join('arch/arm/boot/dts', dtb)
+        dtb_l = os.path.join(dtb_base, dtb)
+
         d, ext = os.path.splitext(dtb)
         os.chdir(path)
         for board in boards:
