@@ -156,12 +156,19 @@ cp ${OUTPUT_DIR}/.config ${OUTPUT_BASE}/kernel.config
 
 do_make
 
+pushd ${OUTPUT_DIR}
+cp -a System.map ${OUTPUT_BASE}
+cp ${BUILD_LOG} ${OUTPUT_BASE}
+
 if [ ${ARCH} = arm ]; then
-    (cd ${OUTPUT_DIR}; cp -a System.map ${OUTPUT_BASE})
-    mkdir -p ${OUTPUT_BASE}/arch/arm
-    cp -r ${OUTPUT_DIR}/arch/arm/boot ${OUTPUT_BASE}/arch/arm
+    cp -a arch/arm/boot/?Image ${OUTPUT_BASE}
+    mkdir ${OUTPUT_BASE}/dtbs
+    cp -a arch/arm/boot/dts/*.dtb ${OUTPUT_BASE}/dtbs
+    #mkdir -p ${OUTPUT_BASE}/arch/arm
+    #cp -r ${OUTPUT_DIR}/arch/arm/boot ${OUTPUT_BASE}/arch/arm
 fi
-    
+popd    
+
 (set -x; ${CROSS_COMPILE}size ${OUTPUT_DIR}/vmlinux)
 
 
