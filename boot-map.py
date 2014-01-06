@@ -1,9 +1,12 @@
 #!/usr/bin/env python
-
+#
+# TODO: implement blacklist in board-map
+#
 import os, sys, glob
 import subprocess
 
 boot_defconfigs = (
+    'bcm_defconfig',
     'exynos_defconfig',
     'imx_v6_v7_defconfig',
     'multi_v7_defconfig',
@@ -48,7 +51,13 @@ board_map = {
 
     # u8500
     'ste-snowball.dtb': ('snowball', ),
+
+    # Broadcom
+    'bcm28155-ap.dtb': ('LAVA:capri', ),
     }
+
+#boot_defconfigs = ('bcm_defconfig', 'multi_v7_defconfig')
+#board_map = {'bcm28155-ap.dtb': ('LAVA:capri', )}
 
 dir = os.path.abspath(sys.argv[1])
 base = os.path.dirname(dir)
@@ -95,6 +104,8 @@ for build in os.listdir(dir):
                 logfile = "boot-%s.log" %d
             cmd = 'pyboot -s -l %s %s %s %s' \
                 %(logfile, board, zImage, dtb_l)
+            if board.startswith('LAVA'):
+                cmd = 'lboot %s %s zImage' %(zImage, dtb_l)
             r = subprocess.call(cmd, shell=True)
             if r != 0:
                 retval = 1
