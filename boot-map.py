@@ -12,6 +12,7 @@ boot_defconfigs = (
     'mvebu_defconfig',
     'tegra_defconfig',
     'u8500_defconfig',
+    'sunxi_defconfig',
 )
 
 board_map = {
