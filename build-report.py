@@ -70,7 +70,7 @@ for build in os.listdir(dir):
 
     total_count += 1
 
-    pass_file = os.path.join(dir, build, 'PASS')
+    pass_file = os.path.join(dir, build, 'build.PASS')
     if os.path.exists(pass_file):
         pass_fail = 'PASS'
         pass_count += 1
