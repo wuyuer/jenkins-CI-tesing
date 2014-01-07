@@ -51,7 +51,7 @@ MAKE_OPTS+="-k -j${MAKE_THREADS} "
 
 # Output dir and build logs
 if [[ -z ${OUTPUT_PREFIX} ]]; then
-  OUTPUT_PREFIX="build-"
+  OUTPUT_PREFIX="build/"
 fi
 if [[ -z ${OUTPUT_TOP} ]]; then
   OUTPUT_TOP="${PWD}/${OUTPUT_PREFIX}$(git describe)"
