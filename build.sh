@@ -112,8 +112,8 @@ function do_report {
 
     # Clean up: remove build output
     /bin/rm -rf ${OUTPUT_DIR}
-    /bin/rm -f ${OUTPUT_BASE}/PASS ${OUTPUT_BASE}/FAIL
-    touch ${OUTPUT_BASE}/${RESULT}
+    /bin/rm -f ${OUTPUT_BASE}/build.PASS ${OUTPUT_BASE}/build.FAIL
+    touch ${OUTPUT_BASE}/build.${RESULT}
 
     END_TIME=`date +%s`
     BUILD_TIME=$(( $END_TIME - $START_TIME ))
@@ -158,7 +158,6 @@ do_make
 
 pushd ${OUTPUT_DIR}
 cp -a System.map ${OUTPUT_BASE}
-cp ${BUILD_LOG} ${OUTPUT_BASE}
 
 if [ ${ARCH} = arm ]; then
     cp -a arch/arm/boot/?Image ${OUTPUT_BASE}
