@@ -4,15 +4,15 @@ import os, sys, glob
 import subprocess
 
 boot_defconfigs = (
-    'omap2plus_defconfig',
     'exynos_defconfig',
-    'multi_v7_defconfig',
     'imx_v6_v7_defconfig',
-    'sama5_defconfig',
+    'multi_v7_defconfig',
     'mvebu_defconfig',
+    'omap2plus_defconfig',
+    'sama5_defconfig',
+    'sunxi_defconfig',
     'tegra_defconfig',
     'u8500_defconfig',
-    'sunxi_defconfig',
 )
 
 board_map = {
