@@ -34,7 +34,7 @@ board_map = {
     'exynos5250-arndale.dtb': ('arndale', ),
 
     # sunxi
-#    'sun4i-a10-cubieboard.dtb': ('cubie', ),
+    'sun4i-a10-cubieboard.dtb': ('cubie', ),
     'sun7i-a20-cubieboard2.dtb': ('cubie2', ),
 
     # i.MX
