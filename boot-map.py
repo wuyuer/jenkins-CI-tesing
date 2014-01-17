@@ -5,19 +5,20 @@
 import os, sys, glob
 import subprocess
 
-boot_defconfigs = (
-    'bcm_defconfig',
-    'exynos_defconfig',
-    'imx_v6_v7_defconfig',
-#    'msm_defconfig',
-    'multi_v7_defconfig',
-    'mvebu_defconfig',
-    'omap2plus_defconfig',
-    'sama5_defconfig',
-    'sunxi_defconfig',
-    'tegra_defconfig',
-    'u8500_defconfig',
-)
+boot_defconfigs = {
+    'bcm_defconfig': (),
+    'exynos_defconfig': (),
+    'imx_v6_v7_defconfig': (),
+#    'msm_defconfig': (),
+    'multi_lpae_defconfig': ('sun7i-a20-cubieboard2.dtb', ),
+    'multi_v7_defconfig': (),
+    'mvebu_defconfig': (),
+    'omap2plus_defconfig': (),
+    'sama5_defconfig': (),
+    'sunxi_defconfig': (),
+    'tegra_defconfig': (),
+    'u8500_defconfig': (),
+}
 
 board_map = {
     # OMAP
@@ -60,9 +61,6 @@ board_map = {
 #    'qcom-apq8074-dragonboard.dts': ('dragon', ),
     }
 
-#boot_defconfigs = ('bcm_defconfig', 'multi_v7_defconfig')
-#board_map = {'bcm28155-ap.dtb': ('LAVA:capri', )}
-
 dir = os.path.abspath(sys.argv[1])
 base = os.path.dirname(dir)
 cwd = os.getcwd()
@@ -79,7 +77,7 @@ for build in os.listdir(dir):
     if '-' in build:
         (arch, defconfig) = build.split('-', 1)
 
-    if not defconfig in boot_defconfigs:
+    if not defconfig in boot_defconfigs.keys():
         continue
     
     zImage = 'zImage'
@@ -88,8 +86,14 @@ for build in os.listdir(dir):
         zImage = os.path.join('arch/arm/boot', 'zImage')
         dtb_base = 'arch/arm/boot/dts'
 
+    dtb_list = boot_defconfigs[defconfig]
     for dtb_path in glob.glob('%s/%s/*.dtb' %(path, dtb_base)):
         dtb = os.path.basename(dtb_path)
+
+        # if dtb_list is not empty, only try defcon
+        if dtb_list:
+            if not dtb in dtb_list:
+                continue
 
         if not board_map.has_key(dtb):
             continue
