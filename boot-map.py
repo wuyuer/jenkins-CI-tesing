@@ -9,6 +9,7 @@ boot_defconfigs = (
     'bcm_defconfig',
     'exynos_defconfig',
     'imx_v6_v7_defconfig',
+#    'msm_defconfig',
     'multi_v7_defconfig',
     'mvebu_defconfig',
     'omap2plus_defconfig',
@@ -54,6 +55,9 @@ board_map = {
 
     # Broadcom
     'bcm28155-ap.dtb': ('LAVA:capri', ),
+
+    # Qcom
+#    'qcom-apq8074-dragonboard.dts': ('dragon', ),
     }
 
 #boot_defconfigs = ('bcm_defconfig', 'multi_v7_defconfig')
