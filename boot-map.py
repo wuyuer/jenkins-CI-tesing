@@ -10,7 +10,7 @@ boot_defconfigs = {
     'exynos_defconfig': (),
     'imx_v6_v7_defconfig': (),
 #    'msm_defconfig': (),
-    'multi_lpae_defconfig': ('sun7i-a20-cubieboard2.dtb', ),
+    'multi_lpae_defconfig': ('sun7i-a20-cubieboard2.dtb', 'omap5-uevm.dtb',),
     'multi_v7_defconfig': (),
     'mvebu_defconfig': (),
     'omap2plus_defconfig': (),
@@ -24,14 +24,16 @@ board_map = {
     # OMAP
     'am335x-bone.dtb': ('am335xbone', ),
     'am335x-boneblack.dtb': ('am335xboneb', ),
-    'omap3-beagle.dtb': ('3530beagle', ),
+#    'omap3-beagle.dtb': ('3530beagle', ),  # TFTP timeout failures
     'omap3-beagle-xm.dtb': ('3730xm', ),
     'omap3-tobi.dtb': ('3530overo', '3730storm'),
     'omap4-panda.dtb': ('4430panda', ),
     'omap4-panda-es.dtb': ('4460panda-es', ),
+#    'omap5-uevm.dtb': ('omap5uevm', ),
 
     # Exynos
     'exynos5250-arndale.dtb': ('arndale', ),
+#    'exynos5410-smdk5410.dts': ('odroid-xu', ),
 
     # sunxi
     'sun4i-a10-cubieboard.dtb': ('cubie', ),
