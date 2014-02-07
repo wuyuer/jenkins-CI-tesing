@@ -2,14 +2,14 @@
 #
 # TODO: implement blacklist in board-map
 #
-import os, sys, glob
-import subprocess
+import os, sys, glob, re
+import subprocess, fileinput
 
 boot_defconfigs = {
     'bcm_defconfig': (),
     'exynos_defconfig': (),
     'imx_v6_v7_defconfig': (),
-#    'msm_defconfig': (),
+    'msm_defconfig': (),
     'multi_lpae_defconfig': ('sun7i-a20-cubieboard2.dtb', 'omap5-uevm.dtb',),
     'multi_v7_defconfig': (),
     'mvebu_defconfig': (),
@@ -26,7 +26,10 @@ board_map = {
     'am335x-boneblack.dtb': ('am335xboneb', ),
 #    'omap3-beagle.dtb': ('3530beagle', ),  # TFTP timeout failures
     'omap3-beagle-xm.dtb': ('3730xm', ),
-    'omap3-tobi.dtb': ('3530overo', '3730storm'),
+#    'omap3-tobi.dtb': ('3530overo', '3730storm'),
+    'omap3-tobi.dtb': ('3530overo', ),
+    'omap3-overo-tobi.dtb': ('3530overo', ),
+    'omap3-overo-storm-tobi.dtb': ('3730storm', ),
     'omap4-panda.dtb': ('4430panda', ),
     'omap4-panda-es.dtb': ('4460panda-es', ),
 #    'omap5-uevm.dtb': ('omap5uevm', ),
@@ -60,7 +63,7 @@ board_map = {
     'bcm28155-ap.dtb': ('LAVA:capri', ),
 
     # Qcom
-#    'qcom-apq8074-dragonboard.dts': ('dragon', ),
+#    'qcom-apq8074-dragonboard.dts': ('LAVA:dragon', ),
     }
 
 dir = os.path.abspath(sys.argv[1])
@@ -69,6 +72,30 @@ cwd = os.getcwd()
 retval = 0
 
 sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0) # Unbuffer output
+
+# Add items from whitelist directly to board_map
+if os.path.exists('.whitelist'):
+    for line in fileinput.input('.whitelist'):
+        if line.startswith('#'):
+            continue
+        dtb, board = line.split()
+        print "Adding", dtb, "to board_map for", board
+        board_map[dtb] = (board, )
+
+# keep track of blacklist, to be removed on the fly
+blacklist = {}
+if os.path.exists('.blacklist'):
+    for line in fileinput.input('.blacklist'):
+        if line.startswith('#') or len(line) <= 1:
+            continue
+        ver_pat, defconfig, dtb = line.split()
+        m = re.search(ver_pat, os.path.basename(dir))
+        if not m:
+            continue
+        if not blacklist.has_key(defconfig):
+            blacklist[defconfig] = list()
+        blacklist[defconfig].append(dtb)
+
 for build in os.listdir(dir):
     path = os.path.join(dir, build)
 
@@ -92,12 +119,16 @@ for build in os.listdir(dir):
     for dtb_path in glob.glob('%s/%s/*.dtb' %(path, dtb_base)):
         dtb = os.path.basename(dtb_path)
 
-        # if dtb_list is not empty, only try defcon
+        # if dtb_list is not empty, only try defconfigs in list
         if dtb_list:
             if not dtb in dtb_list:
                 continue
 
         if not board_map.has_key(dtb):
+            continue
+
+        if blacklist.has_key(defconfig) and dtb in blacklist[defconfig]:
+            print "Blacklisted: ", defconfig, dtb
             continue
 
         boards = board_map[dtb]
@@ -115,7 +146,7 @@ for build in os.listdir(dir):
             cmd = 'pyboot -s -l %s %s %s %s' \
                 %(logfile, board, zImage, dtb_l)
             if board.startswith('LAVA'):
-                cmd = 'lboot %s %s zImage' %(zImage, dtb_l)
+                cmd = 'lboot %s %s' %(zImage, dtb_l)
             r = subprocess.call(cmd, shell=True)
             if r != 0:
                 retval = 1
