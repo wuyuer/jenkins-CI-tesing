@@ -70,7 +70,7 @@ fi
 if [[ ${CCACHE} ]]; then
   MAKE_OPTS+="CC=\"ccache ${CROSS_COMPILE}gcc\" "
   if [[ -z ${CCACHE_DIR} ]]; then
-     export CCACHE_DIR=${OUTPUT_DIR}/ccache
+     export CCACHE_DIR=${PWD}/.ccache
      mkdir -p ${CCACHE_DIR}
      #${CCACHE} --max-size=16G > /dev/null
      ${CCACHE} --zero-stats > /dev/null
