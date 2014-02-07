@@ -14,16 +14,17 @@ ALLTARGETS := $(patsubst arch/${ARCH}/configs/%,build-%,$(ALLCONFIGS))
 
 CONFIG_OVERRIDES="CONFIG_DEBUG_SECTION_MISMATCH=y"
 
-.PHONY: all buildall ccache_setup
+.PHONY: all buildall ccache_setup kjh
 
 all: buildall
 
 build/%:
 	@mkdir -p build/$*
 
-build-%: build/%
+#build-%: build/%
+%_defconfig: build/%_defconfig
 	$(eval CFG := $(patsubst build/%,%,$<))
-	@rm -f $</PASS $</FAIL
+	@rm -f $</PASS $</FAIL $</vmlinux
 	@$(MAKE) -f Makefile O=$< $(CFG) > /dev/null
 	@if $(MAKE) -f Makefile CC=$(CC) $(CONFIG_OVERRIDES) O=$< > $</build.log 2> $</build.log ; then \
 		touch $</PASS; \
