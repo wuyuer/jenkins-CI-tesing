@@ -38,7 +38,7 @@ board_map = {
 
     # Exynos
     'exynos5250-arndale.dtb': ('arndale', ),
-#    'exynos5410-smdk5410.dts': ('odroid-xu', ),
+#    'exynos5410-smdk5410.dtb': ('odroid-xu', ),
 
     # sunxi
     'sun4i-a10-cubieboard.dtb': ('cubie', ),
@@ -65,7 +65,7 @@ board_map = {
     'bcm28155-ap.dtb': ('LAVA:capri', ),
 
     # Qcom
-#    'qcom-apq8074-dragonboard.dts': ('LAVA:dragon', ),
+#    'qcom-apq8074-dragonboard.dtb': ('LAVA:dragon', ),
 
     # Davinci
     'da850-evm.dtb': ('da850evm', ),
