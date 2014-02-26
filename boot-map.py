@@ -7,12 +7,14 @@ import subprocess, fileinput
 
 boot_defconfigs = {
     'bcm_defconfig': (),
+    'da8xx_omapl_defconfig': (),
     'exynos_defconfig': (),
     'imx_v6_v7_defconfig': (),
     'msm_defconfig': (),
     'multi_lpae_defconfig': ('sun7i-a20-cubieboard2.dtb', 'omap5-uevm.dtb',),
     'multi_v7_defconfig': (),
     'mvebu_defconfig': (),
+    'mvebu_v7_defconfig': (),
     'omap2plus_defconfig': (),
     'sama5_defconfig': (),
     'sunxi_defconfig': (),
@@ -64,6 +66,9 @@ board_map = {
 
     # Qcom
 #    'qcom-apq8074-dragonboard.dts': ('LAVA:dragon', ),
+
+    # Davinci
+    'da850-evm.dtb': ('da850evm', ),
     }
 
 dir = os.path.abspath(sys.argv[1])
