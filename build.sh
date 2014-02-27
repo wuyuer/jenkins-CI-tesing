@@ -160,7 +160,7 @@ pushd ${OUTPUT_DIR}
 cp -a System.map ${OUTPUT_BASE}
 
 if [ ${ARCH} = arm ]; then
-    cp -a arch/arm/boot/?Image ${OUTPUT_BASE}
+    cp -a arch/arm/boot/*Image ${OUTPUT_BASE}
     mkdir ${OUTPUT_BASE}/dtbs
     cp -a arch/arm/boot/dts/*.dtb ${OUTPUT_BASE}/dtbs
     #mkdir -p ${OUTPUT_BASE}/arch/arm
