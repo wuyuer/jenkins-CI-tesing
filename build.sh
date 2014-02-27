@@ -165,6 +165,8 @@ if [ ${ARCH} = arm ]; then
     cp -a arch/arm/boot/dts/*.dtb ${OUTPUT_BASE}/dtbs
     #mkdir -p ${OUTPUT_BASE}/arch/arm
     #cp -r ${OUTPUT_DIR}/arch/arm/boot ${OUTPUT_BASE}/arch/arm
+elif [ ${ARCH} = x86_64 ]; then
+    cp -a arch/x86/boot/*Image ${OUTPUT_BASE}
 fi
 popd    
 
