@@ -45,7 +45,7 @@ for build in os.listdir(dir):
         board = os.path.basename(log_prefix)[5:] # drop 'boot-'
 
         result = 'DEAD'
-        r = subprocess.check_output('tail -4 %s | grep Result: | cat' %logfile,
+        r = subprocess.check_output('tail -4 %s | grep --text Result: | cat' %logfile,
                                     shell=True)
         if r:
             result = r.split(':')[-1].strip()
@@ -58,7 +58,7 @@ for build in os.listdir(dir):
             total_fail_count += 1
 
         time = 0
-        l = subprocess.check_output('tail -4 %s | grep Time: | cat' %logfile,
+        l = subprocess.check_output('tail -4 %s | grep --text Time: | cat' %logfile,
                                     shell=True)
         if l:
             t = l.split(':')[2]
