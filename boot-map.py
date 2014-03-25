@@ -35,7 +35,7 @@ board_map = {
     'omap3-overo-storm-tobi.dtb': ('3730storm', ),
     'omap4-panda.dtb': ('4430panda', ),
     'omap4-panda-es.dtb': ('4460panda-es', ),
-#    'omap5-uevm.dtb': ('omap5uevm', ),
+    'omap5-uevm.dtb': ('omap5uevm', ),
 
     # Exynos
     'exynos5250-arndale.dtb': ('arndale', ),
@@ -66,7 +66,7 @@ board_map = {
     'bcm28155-ap.dtb': ('capri', ),
 
     # Qcom
-#    'qcom-apq8074-dragonboard.dtb': ('dragon', ),
+    'qcom-apq8074-dragonboard.dtb': ('dragon', ),
 
     # Davinci
     'da850-evm.dtb': ('da850evm', ),
