@@ -7,6 +7,7 @@ import subprocess, fileinput
 
 boot_defconfigs = {
     'bcm_defconfig': (),
+    'davinci_all_defconfig': (),
     'da8xx_omapl_defconfig': (),
     'exynos_defconfig': (),
     'imx_v6_v7_defconfig': (),
@@ -71,10 +72,40 @@ board_map = {
     'da850-evm.dtb': ('da850evm', ),
     }
 
+legacy_map = {
+    'da8xx_omapl_defconfig': ('da850evm', ), 
+    'davinci_all_defconfig': ('dm365evm', ),
+    'omap2plus_defconfig': ('3530beagle', '3730xm', '3530overo', '3730storm'),
+}
+
 dir = os.path.abspath(sys.argv[1])
 base = os.path.dirname(dir)
 cwd = os.getcwd()
 retval = 0
+
+def boot_boards(zImage, dtb, boards):
+    if dtb:
+        dtb_l = os.path.join(dtb_base, dtb)
+        d, ext = os.path.splitext(dtb)
+    else:
+        dtb_l = '-'
+        d = 'legacy'
+
+    for board in boards:
+        print
+        print "Boot: %s,%s on board %s" %(build, dtb, board)
+
+        if len(boards) > 1 or dtb == None:
+            logfile = "boot-%s,%s.log" %(d, board)
+        else:
+            logfile = "boot-%s.log" %d
+        cmd = 'pyboot -s -l %s %s %s %s' \
+              %(logfile, board, zImage, dtb_l)
+        if board.startswith('LAVA'):
+            cmd = 'lboot %s %s' %(zImage, dtb_l)
+        r = subprocess.call(cmd, shell=True)
+        if r != 0:
+            retval = 1
 
 sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0) # Unbuffer output
 
@@ -120,6 +151,9 @@ for build in os.listdir(dir):
         zImage = os.path.join('arch/arm/boot', 'zImage')
         dtb_base = 'arch/arm/boot/dts'
 
+    # 
+    # DT boot
+    #
     dtb_list = boot_defconfigs[defconfig]
     for dtb_path in glob.glob('%s/%s/*.dtb' %(path, dtb_base)):
         dtb = os.path.basename(dtb_path)
@@ -137,25 +171,17 @@ for build in os.listdir(dir):
             continue
 
         boards = board_map[dtb]
-        dtb_l = os.path.join(dtb_base, dtb)
-
-        d, ext = os.path.splitext(dtb)
         os.chdir(path)
-        for board in boards:
-            print
-            print "Boot: %s,%s on board %s" %(build, dtb, board)
-            if len(boards) > 1:
-                logfile = "boot-%s,%s.log" %(d, board)
-            else:
-                logfile = "boot-%s.log" %d
-            cmd = 'pyboot -s -l %s %s %s %s' \
-                %(logfile, board, zImage, dtb_l)
-            if board.startswith('LAVA'):
-                cmd = 'lboot %s %s' %(zImage, dtb_l)
-            r = subprocess.call(cmd, shell=True)
-            if r != 0:
-                retval = 1
+        boot_boards(zImage, dtb, boards)
+        os.chdir(cwd)
 
+    #
+    # Legacy boot
+    #
+    if legacy_map.has_key(defconfig):
+        boards = legacy_map[defconfig]
+        os.chdir(path)
+        boot_boards(zImage, None, boards)
         os.chdir(cwd)
 
 sys.exit(retval)
