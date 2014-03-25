@@ -63,10 +63,10 @@ board_map = {
     'ste-snowball.dtb': ('snowball', ),
 
     # Broadcom
-    'bcm28155-ap.dtb': ('LAVA:capri', ),
+    'bcm28155-ap.dtb': ('capri', ),
 
     # Qcom
-#    'qcom-apq8074-dragonboard.dtb': ('LAVA:dragon', ),
+#    'qcom-apq8074-dragonboard.dtb': ('dragon', ),
 
     # Davinci
     'da850-evm.dtb': ('da850evm', ),
