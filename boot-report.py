@@ -57,6 +57,16 @@ for build in os.listdir(dir):
             build_fail_count += 1
             total_fail_count += 1
 
+        warnings = 0
+        l = subprocess.check_output('tail -4 %s | grep --text Warnings: | cat' %logfile,
+                                    shell=True)
+        if l:
+            w = l.split(':')[2]
+            try:
+                warnings = int(w)
+            except ValueError:
+                continue
+
         time = 0
         l = subprocess.check_output('tail -4 %s | grep --text Time: | cat' %logfile,
                                     shell=True)
@@ -67,7 +77,7 @@ for build in os.listdir(dir):
             except ValueError:
                 time = -1
 
-        boards[board] = (result, time, logfile)
+        boards[board] = (result, time, logfile, warnings)
 
     if len(boards) > 0:
         builds[build] = (boards, build_fail_count, build_pass_count)
@@ -122,9 +132,8 @@ if total_fail_count:
         for board in boards:
             report = boards[board]
             result = report[0]
-            if result != 'FAIL':
-                continue
-            print '%28s: %8s:    %s' %(board, result, build)
+            if result != 'PASS':
+                print '%28s: %8s:    %s' %(board, result, build)
     print
 
 # Passing Summary
@@ -142,9 +151,13 @@ if total_pass_count:
             result = report[0]
             time = report[1]
             logfile = report[2]
-            print "%28s %8s:    %d min %4.1f sec" \
-                %(board, result, time / 60, time % 60)
-
+            warnings = report[3]
+            print "%28s     %d min %4.1f sec: %8s" \
+                %(board, time / 60, time % 60, result, ),
+            if warnings:
+                print " (Warnings: %d)" %warnings
+            else:
+                print
 
 sep = "=" * 79
 
