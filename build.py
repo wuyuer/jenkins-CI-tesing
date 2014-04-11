@@ -166,12 +166,17 @@ if ccache and len(ccache):
 else:
     ccache_dir = None
 
+# Misc. env overrides
+if os.environ.has_key('GIT_DESCRIBE'):
+    git_describe = os.environ['GIT_DESCRIBE']
+
 # Gather env/info
 if os.path.exists('.git'):
-    git_describe = subprocess.check_output('git describe', shell=True).strip()
     git_commit = subprocess.check_output('git log -n1 --format=%H', shell=True).strip()
     git_url = subprocess.check_output('git config --get remote.origin.url', shell=True).strip()
     git_branch = subprocess.check_output('git rev-parse --abbrev-ref HEAD', shell=True).strip()
+    if not git_describe:
+        git_describe = subprocess.check_output('git describe', shell=True).strip()
 
 cc_cmd = "gcc -v 2>&1"
 if cross_compile:
@@ -199,9 +204,9 @@ if defconfig:
         subprocess.call(cmd, shell = True)
     else:
         do_make(defconfig)
-
 elif os.path.exists(dot_config):
     print "Re-using .config:", dot_config
+    defconfig = "existing"
 else:
     print "ERROR: Missing kernel config"
     sys.exit(0)
