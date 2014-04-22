@@ -33,6 +33,7 @@ board_map = {
     'omap3-tobi.dtb': ('3530overo', ),
     'omap3-overo-tobi.dtb': ('3530overo', ),
     'omap3-overo-storm-tobi.dtb': ('3730storm', ),
+    'omap3-n900.dtb': ('n900', ),
     'omap4-panda.dtb': ('4430panda', ),
     'omap4-panda-es.dtb': ('4460panda-es', ),
     'omap5-uevm.dtb': ('omap5uevm', ),
@@ -75,7 +76,7 @@ board_map = {
 legacy_map = {
     'da8xx_omapl_defconfig': ('da850evm', ), 
     'davinci_all_defconfig': ('dm365evm', ),
-    'omap2plus_defconfig': ('3530beagle', '3730xm', '3530overo', '3730storm'),
+    'omap2plus_defconfig': ('3530beagle', '3730xm', '3530overo', '3730storm', 'n900', ),
 }
 
 dir = os.path.abspath(sys.argv[1])
@@ -99,6 +100,9 @@ def boot_boards(zImage, dtb, boards):
             logfile = "boot-%s,%s.log" %(d, board)
         else:
             logfile = "boot-%s.log" %d
+        if os.path.exists(logfile):
+            print "Skipping %s.  Log file exists: %s\n" %(board, logfile)
+            continue
         cmd = 'pyboot -s -l %s %s %s %s' \
               %(logfile, board, zImage, dtb_l)
         if board.startswith('LAVA'):
