@@ -102,8 +102,6 @@ mail_headers = """From: Kevin's boot bot <khilman+build@linaro.org>
 To: %s
 Subject: %s boot: %d pass, %d fail (%s)
 
-Automated DT boot report for various ARM defconfigs.  
-
 """ %(mail_to, tree_branch, total_pass_count, total_fail_count, describe)
 if maillog:
     stdout_save = sys.stdout
