@@ -93,26 +93,28 @@ except getopt.GetoptError as err:
     sys.exit(2)
 for o, a in opts:
     if o == '-c':
-        if os.path.exists("arch/%s/configs/%s" %(arch, a)):
-            defconfig = a
-        elif a == "defconfig" or re.match("all(\w*)config", a):
-            defconfig = a
-        elif os.path.exists(a):
-            # Append fragment contents to temp frag file
-            frag = open(a)
-            os.write(kconfig_tmpfile_fd, "\n# fragment from: %s\n" %a)
-            for line in frag:
-                os.write(kconfig_tmpfile_fd, line)
-            frag.close()
-            frag_names.append(os.path.basename(os.path.splitext(a)[0]))
-        elif a.startswith("CONFIG_"):
-            # add to temp frag file
-            os.write(kconfig_tmpfile_fd, a + "\n")
-            os.fsync(kconfig_tmpfile_fd)
-            frag_names.append(a)
-        else:
-            print "ERROR: kconfig file/fragment (%s) doesn't exist" %a
-            sys.exit(1)
+        defs = a.split('+')
+        for a in defs:
+            if os.path.exists("arch/%s/configs/%s" %(arch, a)):
+                defconfig = a
+            elif a == "defconfig" or re.match("all(\w*)config", a):
+                defconfig = a
+            elif os.path.exists(a):
+                # Append fragment contents to temp frag file
+                frag = open(a)
+                os.write(kconfig_tmpfile_fd, "\n# fragment from: %s\n" %a)
+                for line in frag:
+                    os.write(kconfig_tmpfile_fd, line)
+                frag.close()
+                frag_names.append(os.path.basename(os.path.splitext(a)[0]))
+            elif a.startswith("CONFIG_"):
+                # add to temp frag file
+                os.write(kconfig_tmpfile_fd, a + "\n")
+                os.fsync(kconfig_tmpfile_fd)
+                frag_names.append(a)
+            else:
+                print "ERROR: kconfig file/fragment (%s) doesn't exist" %a
+                sys.exit(1)
 
     if o == '-i':
         install = True
