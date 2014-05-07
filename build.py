@@ -109,7 +109,7 @@ for o, a in opts:
             # add to temp frag file
             os.write(kconfig_tmpfile_fd, a + "\n")
             os.fsync(kconfig_tmpfile_fd)
-            frag_names.append(a[7:])
+            frag_names.append(a)
         else:
             print "ERROR: kconfig file/fragment (%s) doesn't exist" %a
             sys.exit(1)
