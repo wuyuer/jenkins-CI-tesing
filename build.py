@@ -239,7 +239,7 @@ if num_warnings:
     for warn in warnings:
         print "   ", warn
 
-err_cmd = 'grep -v ^# %s | grep [Ee]rror: | cat' %build_log
+err_cmd = 'grep -v ^# %s | fgrep -i error: | cat' %build_log
 errors = subprocess.check_output(err_cmd, shell=True).splitlines()
 num_errors = len(errors)
 if num_errors:
@@ -344,3 +344,4 @@ if install:
 if kconfig_tmpfile:
     os.unlink(kconfig_tmpfile)
 
+sys.exit(result)
