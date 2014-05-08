@@ -255,7 +255,6 @@ if install:
         install_path += '+' + '+'.join(frag_names)
 
     os.environ['INSTALL_PATH'] = install_path
-    os.environ['INSTALL_MOD_PATH'] = install_path
     if not os.path.exists(install_path):
         os.makedirs(install_path)
     
@@ -281,12 +280,12 @@ if install:
     if len(kimages) == 1:
         kimage_file = kimages[0]
     elif len(kimages) > 1:
-        print "KJH: kimages ", kimages
         kimage_file = kimages[-1]
         for kimage in kimages:
             if os.path.basename(kimage).startswith('z'):
                 kimage_file = kimage
-        print "FIXME: need deal with multiple kernel images.  Picking", kimage_file
+        print "FIXME: need deal with multiple kernel images.  Picking %s from %s" \
+            %(kimage_file, kimages)
 
     if kimage_file:
         shutil.copy(kimage_file, install_path)
@@ -303,7 +302,14 @@ if install:
 
     #do_make('install')
     if modules:
+        tmp_mod_dir = tempfile.mkdtemp()
+        os.environ['INSTALL_MOD_PATH'] = tmp_mod_dir
         do_make('modules_install')
+        modules_tarball = "modules.tar.xz"
+        cmd = "(cd %s; tar -Jcf %s lib/modules)" %(tmp_mod_dir, modules_tarball)
+        subprocess.call(cmd, shell=True)
+        shutil.copy(os.path.join(tmp_mod_dir, modules_tarball), install_path)
+        shutil.rmtree(tmp_mod_dir)
 
     # Generate meta data
     build_meta = os.path.join(install_path, 'build.meta')
@@ -354,10 +360,11 @@ if install:
     else:
         f.write("\n")
 
-    if modules:
-        f.write("modules_dir: lib/modules\n")
+    f.write("modules: ")
+    if modules and modules_tarball:
+        f.write("%s\n" %modules_tarball)
     else:
-        f.write("modules_dir: \n")
+        f.write("\n")
 
     f.write("\n")
     f.write("build_log: %s\n" %os.path.basename(build_log))
