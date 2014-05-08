@@ -267,6 +267,9 @@ if install:
         virt_text = subprocess.check_output('grep " _text" %s' %system_map, shell=True).split()[0]
         text_offset = int(virt_text, 16) & (1 << 30)-1  # phys: cap at 1G
         shutil.copy(system_map, install_path)
+    else:
+        system_map = None
+        text_offset = None
 
     shutil.copy(dot_config, install_path)
     shutil.copy(build_log, install_path)
@@ -277,7 +280,7 @@ if install:
     kimages = glob.glob("%s/*Image" %boot_dir)
     if len(kimages) == 1:
         kimage_file = kimages[0]
-    else:
+    elif len(kimages) > 1:
         print "KJH: kimages ", kimages
         kimage_file = kimages[-1]
         for kimage in kimages:
@@ -285,14 +288,18 @@ if install:
                 kimage_file = kimage
         print "FIXME: need deal with multiple kernel images.  Picking", kimage_file
 
-    shutil.copy(kimage_file, install_path)
+    if kimage_file:
+        shutil.copy(kimage_file, install_path)
 
     dtbs = glob.glob("%s/dts/*.dtb" %boot_dir)
-    dtb_dest = os.path.join(install_path, 'dtbs')
-    if not os.path.exists(dtb_dest):
-        os.makedirs(dtb_dest)
-    for dtb in dtbs:
-        shutil.copy(dtb, dtb_dest)
+    if len(dtbs):
+        dtb_dest = os.path.join(install_path, 'dtbs')
+        if not os.path.exists(dtb_dest):
+            os.makedirs(dtb_dest)
+        for dtb in dtbs:
+            shutil.copy(dtb, dtb_dest)
+    else:
+        dtb_dest = None
 
     #do_make('install')
     if modules:
@@ -322,11 +329,31 @@ if install:
         f.write("kconfig_fragments:\n")
     f.write("\n")
 
-    f.write("kernel_image: %s\n" %os.path.basename(kimage_file))
+    f.write("kernel_image: ")
+    if kimage_file:
+        f.write("%s\n" %os.path.basename(kimage_file))
+    else:
+        f.write("\n")
+    
     f.write("kernel_config: %s\n" %os.path.basename(dot_config))
-    f.write("system_map: %s\n" %os.path.basename(system_map))
-    f.write("text_offset: 0x%08x\n" %text_offset)
-    f.write("dtb_dir: %s\n" %os.path.basename(dtb_dest))
+    f.write("system_map: ")
+    if system_map:
+        f.write("%s\n" %os.path.basename(system_map))
+    else:
+        f.write("\n")
+
+    f.write("text_offset: ")
+    if text_offset:
+        f.write("0x%08x\n" %text_offset)
+    else:
+        f.write("\n")
+
+    f.write("dtb_dir: ")
+    if dtb_dest:
+        f.write("%s\n" %os.path.basename(dtb_dest))
+    else:
+        f.write("\n")
+
     if modules:
         f.write("modules_dir: lib/modules\n")
     else:
