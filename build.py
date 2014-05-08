@@ -281,7 +281,7 @@ if install:
         print "KJH: kimages ", kimages
         kimage_file = kimages[-1]
         for kimage in kimages:
-            if kimage.startswith('z'):
+            if os.path.basename(kimage).startswith('z'):
                 kimage_file = kimage
         print "FIXME: need deal with multiple kernel images.  Picking", kimage_file
 
