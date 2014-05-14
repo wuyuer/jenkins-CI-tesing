@@ -324,7 +324,7 @@ if install:
 
     f.write("arch: %s\n" %arch)
     f.write("cross_compile: %s\n" %cross_compile)
-    f.write("compiler_verson: %s\n" %gcc_version)
+    f.write("compiler_version: %s\n" %gcc_version)
     f.write("git_url: %s\n" %git_url)
     f.write("git_branch: %s\n" %git_branch)
     f.write("git_describe: %s\n" %git_describe)
