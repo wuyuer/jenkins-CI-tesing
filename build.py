@@ -314,6 +314,7 @@ if install:
     # Generate meta data
     build_meta = os.path.join(install_path, 'build.meta')
     f = open(build_meta, 'w')
+    f.write("[DEFAULT]\n") # make it easy for python ConfigParser
     f.write("build_result: ")
     if result == 0:
         f.write("PASS\n")
