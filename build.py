@@ -270,7 +270,9 @@ if install:
         system_map = None
         text_offset = None
 
-    shutil.copy(dot_config, install_path)
+    dot_config_installed = os.path.join(install_path, "kernel.config")
+    shutil.copy(dot_config, dot_config_installed)
+
     shutil.copy(build_log, install_path)
     if kconfig_frag:
         shutil.copy(kconfig_frag, install_path)
@@ -342,7 +344,7 @@ if install:
     else:
         f.write("\n")
     
-    f.write("kernel_config: %s\n" %os.path.basename(dot_config))
+    f.write("kernel_config: %s\n" %os.path.basename(dot_config_installed))
     f.write("system_map: ")
     if system_map:
         f.write("%s\n" %os.path.basename(system_map))
