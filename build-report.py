@@ -70,13 +70,25 @@ for build in os.listdir(dir):
 
     total_count += 1
 
-    pass_file = os.path.join(dir, build, 'build.PASS')
-    if os.path.exists(pass_file):
-        pass_fail = 'PASS'
-        pass_count += 1
+    pass_fail = 'UNKNOWN'
+    build_meta = os.path.join(dir, build, 'build.meta')
+    if os.path.exists(build_meta):
+        build_result = subprocess.check_output('fgrep build_result: %s' %build_meta, shell=True)
+        pass_fail = build_result.split(':')[1].strip()
+        if pass_fail == 'PASS':
+            pass_count += 1
+        else:
+            fail_count += 1
     else:
-        pass_fail = 'FAIL'
-        fail_count += 1
+        print "WARNING: build %s missing build.meta file" %build
+
+#    pass_file = os.path.join(dir, build, 'build.PASS')
+#    if os.path.exists(pass_file):
+#        pass_fail = 'PASS'
+#        pass_count += 1
+#    else:
+#        pass_fail = 'FAIL'
+#        fail_count += 1
         
     # Error messages, strip of the path prefix
     err_cmd = 'grep [Ee]rror: %s | cat' %buildlog
@@ -143,13 +155,9 @@ maillog = tempfile.mktemp(suffix='.log', prefix='build-report')
 mail_headers = """From: Kevin Hilman build bot <khilman+build@linaro.org>
 To: %s
 Subject: %s build: %d failures %d warnings (%s)
-
-Automated build results for all ARM defconfigs.  Summarizes all build
-errors, warnings and section mismatches followed by a per-defconfig
-summary.
-
 """ %(mail_to, tree_branch, fail_count, warning_count, describe)
-if mail_to and maillog:
+
+if maillog:
     stdout_save = sys.stdout
     sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0) # Unbuffer output
     tee = subprocess.Popen(["tee", "%s" %maillog], stdin=subprocess.PIPE)
@@ -167,10 +175,16 @@ if build_time:
 
 formatter = "{:6.2f}"
 print
-print "Passed: %3d / %d   (%6.2f %%)" \
+print "Passed: %4d / %d   (%6.2f %%)" \
     %(pass_count, total_count, float(pass_count) / total_count * 100)
-print "Failed: %3d / %d   (%6.2f %%)" \
+print "Failed: %4d / %d   (%6.2f %%)" \
     %(fail_count, total_count, float(fail_count) / total_count * 100)
+unknown_count = total_count - (pass_count + fail_count)
+if unknown_count:
+    print "Unknown: %3d / %d   (%6.2f %%)" \
+        %(unknown_count, total_count, float(unknown_count) / total_count * 100)
+
+
 print
 print "Errors:", error_count
 print "Warnings:", warning_count
@@ -212,10 +226,10 @@ for build in report:
     if not (len(w) or len(m)):
         continue
 
-    print "%40s: " %build,
+    print "   ",
     print "%3d warnings " %len(w),
     print "%3d mismatches " %len(m),
-    print
+    print ": %s" %build
 
 print
 print sep

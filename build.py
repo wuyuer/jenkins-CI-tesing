@@ -13,6 +13,7 @@ import tempfile
 import glob
 import shutil
 import re
+import stat
 
 cross_compilers = {
     "arm": "arm-linux-gnueabi-",
@@ -121,6 +122,9 @@ for o, a in opts:
     if o == '-s':
         silent = not silent
 
+# Default umask for file creation
+os.umask(022)
+
 # Set number of make threads to number of local processors + 2
 if os.path.exists('/proc/cpuinfo'):
     output = subprocess.check_output('grep -c processor /proc/cpuinfo',
@@ -201,6 +205,7 @@ if defconfig:
     if len(frag_names):
         kconfig_frag = os.path.join(kbuild_output, 'frag-' + '+'.join(frag_names) + '.config')
         shutil.copy(kconfig_tmpfile, kconfig_frag)
+        os.chmod(kconfig_frag, stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IROTH)
         cmd = "scripts/kconfig/merge_config.sh -O %s arch/%s/configs/%s %s > /dev/null 2>&1" %(kbuild_output, arch, defconfig, kconfig_frag)
         print cmd
         subprocess.call(cmd, shell = True)

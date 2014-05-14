@@ -181,7 +181,7 @@ for build in builds:
         if result == 'PASS':
             continue
 
-        n = 80
+        n = 40
         line = '%s: %s: last %d lines of boot log:' %(board, result, n)
         print
         print '\t', line
