@@ -14,6 +14,7 @@ import glob
 import shutil
 import re
 import stat
+import json
 
 cross_compilers = {
     "arm": "arm-linux-gnueabi-",
@@ -253,6 +254,7 @@ if num_errors:
         print "   ", err
 
 # Install
+bmeta = {}
 if install:
     install_path = os.path.join(os.getcwd(), '_install_', git_describe)
     install_path = os.path.join(install_path, '-'.join([arch, defconfig]))
@@ -320,65 +322,67 @@ if install:
 
     # Generate meta data
     build_meta = os.path.join(install_path, 'build.meta')
+
+    if result == 0:
+        bmeta['build_result'] = "PASS"
+    else:
+        bmeta['build_result'] = "FAIL"
+
+    bmeta['arch'] = "%s" %arch
+    bmeta["cross_compile"] = "%s" %cross_compile
+    bmeta["compiler_version"] = "%s" %gcc_version
+    bmeta["git_url"] = "%s" %git_url
+    bmeta["git_branch"] =  "%s" %git_branch
+    bmeta["git_describe"] =  "%s" %git_describe
+    bmeta["git_commit"] = "%s" %git_commit
+    bmeta["defconfig"] = "%s" %defconfig
+    if kconfig_frag:
+        bmeta["kconfig_fragments"] = "%s" %os.path.basename(kconfig_frag)
+    else:
+        bmeta["kconfig_fragments"] = None
+
+    if kimage_file:
+        bmeta["kernel_image"] = "%s" %os.path.basename(kimage_file)
+    else:
+        bmeta["kernel_image"] = None
+    
+    bmeta["kernel_config"] = "%s" %os.path.basename(dot_config_installed)
+    if system_map:
+        bmeta["system_map"] = "%s" %os.path.basename(system_map)
+    else:
+        bmeta["system_map"] = None
+
+    if text_offset:
+        bmeta["text_offset"] = "0x%08x" %text_offset
+    else:
+        bmeta["text_offset"] = None
+
+    if dtb_dest:
+        bmeta["dtb_dir"] = "%s" %os.path.basename(dtb_dest)
+    else:
+        bmeta["dtb_dir"] = None
+
+    if modules and modules_tarball:
+        bmeta["modules"] = "%s" %modules_tarball
+    else:
+        bmeta["modules"] = None
+
+    bmeta["build_log"] = "%s" %os.path.basename(build_log)
+    bmeta["build_errors"] = num_errors
+    bmeta["build_warnings"] = num_warnings
+
+    # Create INI format build metatdata
     f = open(build_meta, 'w')
     f.write("[DEFAULT]\n") # make it easy for python ConfigParser
-    f.write("build_result: ")
-    if result == 0:
-        f.write("PASS\n")
-    else:
-        f.write("FAIL\n")
-    f.write("\n")
-
-    f.write("arch: %s\n" %arch)
-    f.write("cross_compile: %s\n" %cross_compile)
-    f.write("compiler_version: %s\n" %gcc_version)
-    f.write("git_url: %s\n" %git_url)
-    f.write("git_branch: %s\n" %git_branch)
-    f.write("git_describe: %s\n" %git_describe)
-    f.write("git_commit: %s\n" %git_commit)
-    f.write("defconfig: %s\n" %defconfig)
-    if kconfig_frag:
-        f.write("kconfig_fragments: %s\n" %os.path.basename(kconfig_frag))
-    else:
-        f.write("kconfig_fragments:\n")
-    f.write("\n")
-
-    f.write("kernel_image: ")
-    if kimage_file:
-        f.write("%s\n" %os.path.basename(kimage_file))
-    else:
-        f.write("\n")
-    
-    f.write("kernel_config: %s\n" %os.path.basename(dot_config_installed))
-    f.write("system_map: ")
-    if system_map:
-        f.write("%s\n" %os.path.basename(system_map))
-    else:
-        f.write("\n")
-
-    f.write("text_offset: ")
-    if text_offset:
-        f.write("0x%08x\n" %text_offset)
-    else:
-        f.write("\n")
-
-    f.write("dtb_dir: ")
-    if dtb_dest:
-        f.write("%s\n" %os.path.basename(dtb_dest))
-    else:
-        f.write("\n")
-
-    f.write("modules: ")
-    if modules and modules_tarball:
-        f.write("%s\n" %modules_tarball)
-    else:
-        f.write("\n")
-
-    f.write("\n")
-    f.write("build_log: %s\n" %os.path.basename(build_log))
-    f.write("build_errors: %d\n" %num_errors);
-    f.write("build_warnings: %d\n" %num_warnings);
+    for key in sorted(bmeta):
+        f.write("%s: %s\n" %(key, bmeta[key]))
     f.close()
+
+    # Create JSON format build metadata
+    build_json = os.path.join(install_path, 'build.json')
+    build_json_f = open(build_json, 'w')
+    json.dump(bmeta, build_json_f, indent=4, sort_keys=True)
+    build_json_f.close()
 
 #
 # Cleanup
