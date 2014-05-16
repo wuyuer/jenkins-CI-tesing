@@ -15,6 +15,7 @@ import shutil
 import re
 import stat
 import json
+import platform
 
 cross_compilers = {
     "arm": "arm-linux-gnueabi-",
@@ -370,6 +371,7 @@ if install:
     bmeta["build_log"] = "%s" %os.path.basename(build_log)
     bmeta["build_errors"] = num_errors
     bmeta["build_warnings"] = num_warnings
+    bmeta["build_platform"] = platform.uname()
 
     # Create INI format build metatdata
     f = open(build_meta, 'w')
