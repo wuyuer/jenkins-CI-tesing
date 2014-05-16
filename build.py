@@ -192,13 +192,6 @@ if cross_compile:
     cc_cmd = "%sgcc -v 2>&1" %cross_compile
 gcc_version = subprocess.check_output(cc_cmd, shell=True).splitlines()[-1]
 
-# for var in ['ARCH', 'CROSS_COMPILE', 'CCACHE_DIR', 'KBUILD_OUTPUT']:
-#     if os.environ.has_key(var):
-#         val = os.environ[var]
-#     else:
-#         val = ""
-#     print "#", var, "=", val
-
 start_time = time.time()
 
 #
