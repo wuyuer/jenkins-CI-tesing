@@ -62,6 +62,7 @@ board_map = {
 
     # Tegra
     'tegra30-beaver.dtb': ('beaver', ),
+    'tegra124-jetson-tk1.dtb': ('jetson', ),
 
     # u8500
     'ste-snowball.dtb': ('snowball', ),
