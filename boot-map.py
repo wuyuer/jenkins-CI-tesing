@@ -5,6 +5,8 @@
 import os, sys, glob, re
 import subprocess, fileinput
 
+skip_existing_logs = False
+
 boot_defconfigs = {
     'bcm_defconfig': (),
     'davinci_all_defconfig': (),
@@ -12,7 +14,7 @@ boot_defconfigs = {
     'exynos_defconfig': (),
     'imx_v6_v7_defconfig': (),
     'msm_defconfig': (),
-    'multi_lpae_defconfig': ('sun7i-a20-cubieboard2.dtb', 'omap5-uevm.dtb',),
+    'multi_v7_defconfig+CONFIG_ARM_LPAE=y': ('sun7i-a20-cubieboard2.dtb', 'omap5-uevm.dtb', 'armada-xp-openblocks-ax3-4.dtb', ),
     'multi_v7_defconfig': (),
     'mvebu_defconfig': (),
     'mvebu_v7_defconfig': (),
@@ -40,6 +42,7 @@ board_map = {
 
     # Exynos
     'exynos5250-arndale.dtb': ('arndale', ),
+    'exynos5420-arndale-octa.dtb': ('octa', ),
 #    'exynos5410-smdk5410.dtb': ('odroid-xu', ),
 
     # sunxi
@@ -100,9 +103,10 @@ def boot_boards(zImage, dtb, boards):
             logfile = "boot-%s,%s.log" %(d, board)
         else:
             logfile = "boot-%s.log" %d
-        if os.path.exists(logfile):
-            print "Skipping %s.  Log file exists: %s\n" %(board, logfile)
-            continue
+        if skip_existing_logs:
+            if os.path.exists(logfile):
+                print "Skipping %s.  Log file exists: %s\n" %(board, logfile)
+                continue
         cmd = 'pyboot -s -l %s %s %s %s' \
               %(logfile, board, zImage, dtb_l)
         if board.startswith('LAVA'):
@@ -170,7 +174,12 @@ for build in os.listdir(dir):
         if not board_map.has_key(dtb):
             continue
 
-        if blacklist.has_key(defconfig) and dtb in blacklist[defconfig]:
+        i = defconfig.find('+')
+        if i > 0:
+            d = defconfig[:i]
+        else:
+            d = defconfig
+        if blacklist.has_key(d) and dtb in blacklist[d]:
             print "Blacklisted: ", defconfig, dtb
             continue
 
