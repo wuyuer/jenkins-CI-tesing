@@ -16,6 +16,7 @@ import re
 import stat
 import json
 import platform
+import time
 
 cross_compilers = {
     "arm": "arm-linux-gnueabi-",
@@ -198,6 +199,8 @@ gcc_version = subprocess.check_output(cc_cmd, shell=True).splitlines()[-1]
 #         val = ""
 #     print "#", var, "=", val
 
+start_time = time.time()
+
 #
 # Config
 #
@@ -233,6 +236,8 @@ if result == 0:
     modules = not subprocess.call('grep -cq CONFIG_MODULES=y %s' %dot_config, shell=True) 
     if modules:
         result |= do_make('modules', log=True)
+
+build_time = time.time() - start_time
 
 # Check errors/warnings
 warn_cmd = 'grep -v ^# %s | fgrep warning: | ' \
@@ -324,6 +329,7 @@ if install:
     # Generate meta data
     build_meta = os.path.join(install_path, 'build.meta')
 
+    bmeta["build_time"] = round(build_time, 2)
     if result == 0:
         bmeta['build_result'] = "PASS"
     else:
