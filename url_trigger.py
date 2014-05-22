@@ -3,6 +3,7 @@
 # Options:
 #  -a build all defconfigs (otherwise just 'defconfig' is built)
 #  -b branch name
+#  -c architecture list (space separated, in quotes. otherwise just 'arm' is built)
 #  -d debug: just print URL, don't fetch it
 #  -f defconfig list (space separated, in quotes)
 #  -n tree name
@@ -33,7 +34,7 @@ debug = False
 tree_name = os.environ['USER'] + '-test'
 
 try:
-    opts, args = getopt.getopt(sys.argv[1:], "adb:f:n:pt:")
+    opts, args = getopt.getopt(sys.argv[1:], "adb:c:f:n:pt:")
 except getopt.GetoptError as err:
     print str(err) # will print something like "option -a not recognized"
     sys.exit(2)
@@ -42,6 +43,8 @@ all_defconfigs = False
 for o, a in opts:
     if o == "-a":
         all_defconfigs = True
+    if o == "-c":
+        params['ARCH_LIST'] = a
     if o == "-b":
         params['BRANCH'] = a
     if o == "-d":
