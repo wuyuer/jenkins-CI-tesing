@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 #
 # NOTES:
-# - override ARCH and CROSS_COMPILE using environment varialbes
+# - override ARCH and CROSS_COMPILE using environment variables
 #
 # TODO
 #
@@ -89,6 +89,12 @@ install = False
 # temp frag file: used to collect all kconfig fragments
 kconfig_tmpfile_fd, kconfig_tmpfile = tempfile.mkstemp(prefix='kconfig-')
 
+# ARCH
+if os.environ.has_key('ARCH'):
+    arch = os.environ['ARCH']
+else:
+    os.environ['ARCH'] = arch
+
 try:
     opts, args = getopt.getopt(sys.argv[1:], "c:si")
 
@@ -99,7 +105,7 @@ for o, a in opts:
     if o == '-c':
         defs = a.split('+')
         for a in defs:
-            if os.path.exists("arch/%s/configs/%s" %(arch, a)):
+            if os.path.exists("arch/%s/configs/%s" % (arch, a)):
                 defconfig = a
             elif a == "defconfig" or re.match("all(\w*)config", a):
                 defconfig = a
@@ -133,12 +139,6 @@ if os.path.exists('/proc/cpuinfo'):
     output = subprocess.check_output('grep -c processor /proc/cpuinfo',
                                      shell=True)
     make_threads = int(output) + 2
-
-# ARCH
-if os.environ.has_key('ARCH'):
-    arch = os.environ['ARCH']
-else:
-    os.environ['ARCH'] = arch
 
 # CROSS_COMPILE
 if cross_compilers.has_key(arch):
