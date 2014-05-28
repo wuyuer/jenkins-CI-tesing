@@ -22,7 +22,7 @@ cross_compilers = {
     "arm": "arm-linux-gnueabi-",
     "arm64": "aarch64-linux-gnu-",
     "i386": None,
-    "x86_64": None,
+    "x86": None,
 }
 
 # Defaults
