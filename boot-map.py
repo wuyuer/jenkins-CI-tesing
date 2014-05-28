@@ -43,7 +43,7 @@ board_map = {
     # Exynos
     'exynos5250-arndale.dtb': ('arndale', ),
     'exynos5420-arndale-octa.dtb': ('octa', ),
-#    'exynos5410-smdk5410.dtb': ('odroid-xu', ),
+    'exynos5410-smdk5410.dtb': ('odroid-xu', ),
 
     # sunxi
     'sun4i-a10-cubieboard.dtb': ('cubie', ),
