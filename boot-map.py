@@ -6,6 +6,7 @@ import os, sys, glob, re
 import subprocess, fileinput
 
 skip_existing_logs = True
+dry_run = False
 
 boot_defconfigs = {
     'bcm_defconfig': (),
@@ -112,9 +113,12 @@ def boot_boards(zImage, dtb, boards):
               %(logfile, board, zImage, dtb_l)
         if board.startswith('LAVA'):
             cmd = 'lboot %s %s' %(zImage, dtb_l)
-        r = subprocess.call(cmd, shell=True)
-        if r != 0:
-            retval = 1
+        if dry_run:
+            print cmd
+        else:
+            r = subprocess.call(cmd, shell=True)
+            if r != 0:
+                retval = 1
 
 sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0) # Unbuffer output
 
