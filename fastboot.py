@@ -25,6 +25,8 @@ dtb = None
 initrd = None
 if len(args) > 1:
     dtb = args[1]
+    if dtb == 'None':
+        dtb = None
 if len(args) > 2:
     initrd = args[2]
     if initrd == 'None':
@@ -36,8 +38,10 @@ print sys.argv[0], board, kernel, dtb, initrd
 boards = {
     'dragon': ("25001b4", "boot", "console=ttyMSM0,115200,n8 debug earlyprintk"),
     'capri': ("1234567890", "flash", ""),
-#    'n900': (None, "nolo", "console=ttyO2,115200n8 debug"),
-    'n900': (None, "nolo", "init=/sbin/preinit ubi.mtd=rootfs root=ubi0:rootfs rootfstype=ubifs rootflags=bulk_read,no_chk_data_crc rw console=ttyMTD,log console=tty0 console=ttyO2,115200n8 debug init=/bin/sh"),
+#    'n900': (None, "nolo", "console=ttyO2,115200n8 debug earlyprintk root=/dev/ram"),
+    'n900': (None, "nolo", "console=ttyO2,115200n8 debug earlyprintk rw rootwait root=/dev/mmcblk0p2"),
+#    'n900': (None, "nolo", "init=/sbin/preinit ubi.mtd=rootfs root=ubi0:rootfs rootfstype=ubifs rootflags=bulk_read,no_chk_data_crc rw console=ttyMTD,log console=tty0 console=ttyO2,115200n8 debug init=/bin/sh"),
+#    'n900': (None, "nolo", "ubi.mtd=rootfs root=ubi0:initfs rootfstype=ubifs rootflags=bulk_read,no_chk_data_crc rw console=ttyMTD,log console=tty0 console=ttyO2,115200n8 debug init=/bin/sh"),
 }
 
 kernel_l = ''
@@ -110,10 +114,15 @@ elif fastboot_cmd == 'flash':
 
 # Nokia NOLO commands
 elif fastboot_cmd == 'nolo':
-    flasher_cmd = "/home/khilman/work.local/platforms/nokia/rover/flasher"
-    cmd = "%s -l -k %s " %(flasher_cmd, kernel_l)
-    if initrd_l:
-        cmd += "-n %s " %initrd_l
+    # NOLO requires DTB appended
+    cmd = "cat %s >> %s" %(dtb_l, kernel_l)
+    subprocess.call(cmd, shell=True)
+
+    nokia_tools = "/home/khilman/work.local/platforms/nokia/rover"
+    os.chdir(nokia_tools)
+    cmd = "./off; sleep 1; ./on; ./flasher -l -k %s " %kernel_l
+#    if initrd_l:
+#        cmd += "-n %s " %initrd_l
     cmd += "-b"
     if cmdline:
         cmd += '"%s" ' %cmdline
