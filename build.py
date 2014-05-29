@@ -186,6 +186,7 @@ if os.path.exists('.git'):
     git_branch = subprocess.check_output('git rev-parse --abbrev-ref HEAD', shell=True).strip()
     if not git_describe:
         git_describe = subprocess.check_output('git describe', shell=True).strip()
+        git_describe_v = subprocess.check_output('git describe --match=v3\*', shell=True).strip()
 
 cc_cmd = "gcc -v 2>&1"
 if cross_compile:
@@ -199,16 +200,19 @@ start_time = time.time()
 #
 dot_config = os.path.join(kbuild_output, '.config')
 
-if defconfig:
+if defconfig or kconfig_frag:
+    base = dot_config
+    if defconfig:
+        do_make(defconfig, log=True)
+
     if len(frag_names):
         kconfig_frag = os.path.join(kbuild_output, 'frag-' + '+'.join(frag_names) + '.config')
         shutil.copy(kconfig_tmpfile, kconfig_frag)
         os.chmod(kconfig_frag, stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IROTH)
-        cmd = "scripts/kconfig/merge_config.sh -O %s arch/%s/configs/%s %s > /dev/null 2>&1" %(kbuild_output, arch, defconfig, kconfig_frag)
+        cmd = "scripts/kconfig/merge_config.sh -O %s %s %s > /dev/null 2>&1" %(kbuild_output, base, kconfig_frag)
         print cmd
         subprocess.call(cmd, shell = True)
-    else:
-        do_make(defconfig)
+
 elif os.path.exists(dot_config):
     print "Re-using .config:", dot_config
     defconfig = "existing"
@@ -334,6 +338,7 @@ if install:
     bmeta["git_url"] = "%s" %git_url
     bmeta["git_branch"] =  "%s" %git_branch
     bmeta["git_describe"] =  "%s" %git_describe
+    bmeta["git_describe_v"] =  "%s" %git_describe_v
     bmeta["git_commit"] = "%s" %git_commit
     bmeta["defconfig"] = "%s" %defconfig
     if kconfig_frag:
