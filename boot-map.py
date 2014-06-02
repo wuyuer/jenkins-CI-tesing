@@ -16,6 +16,7 @@ boot_defconfigs = {
     'imx_v6_v7_defconfig': (),
     'msm_defconfig': (),
     'multi_v7_defconfig+CONFIG_ARM_LPAE=y': ('sun7i-a20-cubieboard2.dtb', 'omap5-uevm.dtb', 'armada-xp-openblocks-ax3-4.dtb', 'tegra124-jetson-tk1.dtb', ),
+    'multi_v7_defconfig+CONFIG_CPU_BIG_ENDIAN=y': ('armada-xp-openblocks-ax3-4.dtb', 'armada-370-mirabox.dtb', ),
     'multi_v7_defconfig': (),
     'mvebu_defconfig': (),
     'mvebu_v7_defconfig': (),
@@ -109,8 +110,21 @@ def boot_boards(zImage, dtb, boards):
             if os.path.exists(logfile):
                 print "Skipping %s.  Log file exists: %s\n" %(board, logfile)
                 continue
-        cmd = 'pyboot -s -l %s %s %s %s' \
-              %(logfile, board, zImage, dtb_l)
+
+        # Check endianness of zImage
+        endian = "little"
+        initrd = ""
+        out = subprocess.check_output("file %s" %zImage, shell=True).strip()
+        f, magic = out.split(":", 1)
+        m = re.search(".*\((\w+)-endian\)", magic)
+        if m:
+            endian = m.group(1)
+        if endian == "big":
+            initrd = "/opt/kjh/rootfs/buildroot/armeb/rootfs.cpio.gz"
+
+        cmd = 'pyboot -s -l %s %s %s %s %s' \
+              %(logfile, board, zImage, dtb_l, initrd)
+
         if board.startswith('LAVA'):
             cmd = 'lboot %s %s' %(zImage, dtb_l)
         if dry_run:
