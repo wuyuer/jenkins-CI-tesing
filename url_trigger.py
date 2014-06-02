@@ -31,10 +31,12 @@ params = {
 debug = False
 
 # Defaults
+tree = None
 tree_name = os.environ['USER'] + '-test'
+this_tree = False  # set tree URL based on current git repo
 
 try:
-    opts, args = getopt.getopt(sys.argv[1:], "adb:c:f:n:pt:")
+    opts, args = getopt.getopt(sys.argv[1:], "adb:c:f:n:pt:T")
 except getopt.GetoptError as err:
     print str(err) # will print something like "option -a not recognized"
     sys.exit(2)
@@ -56,9 +58,17 @@ for o, a in opts:
     if o == "-p":
         params['PUBLISH'] = True
     if o == "-t":
-        params['TREE'] = a
+        tree = a
+    if o == "-T":
+        this_tree = True
+
+if this_tree and os.path.exists(".git"):
+    cmd = "git config --get remote.origin.url"
+    tree = subprocess.check_output(cmd, shell=True)
 
 params['TREE_NAME'] = tree_name
+if tree:
+    params['TREE'] = tree
 
 # Add all available defconfigs to DEFCONFIG_LIST
 if all_defconfigs:
