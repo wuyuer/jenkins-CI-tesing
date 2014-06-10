@@ -200,10 +200,11 @@ start_time = time.time()
 #
 dot_config = os.path.join(kbuild_output, '.config')
 
-if defconfig or kconfig_frag:
-    base = dot_config
+if defconfig or frag_names:
+    base = ""
     if defconfig:
         do_make(defconfig, log=True)
+        base = dot_config
 
     if len(frag_names):
         kconfig_frag = os.path.join(kbuild_output, 'frag-' + '+'.join(frag_names) + '.config')
