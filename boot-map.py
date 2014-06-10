@@ -14,12 +14,13 @@ boot_defconfigs = {
     'da8xx_omapl_defconfig': (),
     'exynos_defconfig': (),
     'imx_v6_v7_defconfig': (),
-    'msm_defconfig': (),
+    'qcom_defconfig': (),
     'multi_v7_defconfig+CONFIG_ARM_LPAE=y': ('sun7i-a20-cubieboard2.dtb', 'omap5-uevm.dtb', 'armada-xp-openblocks-ax3-4.dtb', 'tegra124-jetson-tk1.dtb', ),
     'multi_v7_defconfig+CONFIG_CPU_BIG_ENDIAN=y': ('armada-xp-openblocks-ax3-4.dtb', 'armada-370-mirabox.dtb', ),
     'multi_v7_defconfig': (),
     'mvebu_defconfig': (),
     'mvebu_v7_defconfig': (),
+    'mvebu_v7_defconfig+CONFIG_CPU_BIG_ENDIAN=y': ('armada-xp-openblocks-ax3-4.dtb', 'armada-370-mirabox.dtb', ),
     'omap2plus_defconfig': (),
     'sama5_defconfig': (),
     'sunxi_defconfig': (),
@@ -106,9 +107,11 @@ def boot_boards(zImage, dtb, boards):
             logfile = "boot-%s,%s.log" %(d, board)
         else:
             logfile = "boot-%s.log" %d
+        base, ext = os.path.splitext(logfile)
         if skip_existing_logs:
-            if os.path.exists(logfile):
-                print "Skipping %s.  Log file exists: %s\n" %(board, logfile)
+            json = base + ".json"
+            if os.path.exists(json):
+                print "Skipping %s.  JSON file exists: %s\n" %(board, json)
                 continue
 
         # Check endianness of zImage
