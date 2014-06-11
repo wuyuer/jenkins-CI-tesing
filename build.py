@@ -29,6 +29,7 @@ cross_compilers = {
 arch = "arm"
 cross_compile = cross_compilers[arch]
 git_describe = None
+git_describe_v = None
 git_commit = None
 ccache = None
 make_threads = 2
@@ -184,9 +185,9 @@ if os.path.exists('.git'):
     git_commit = subprocess.check_output('git log -n1 --format=%H', shell=True).strip()
     git_url = subprocess.check_output('git config --get remote.origin.url', shell=True).strip()
     git_branch = subprocess.check_output('git rev-parse --abbrev-ref HEAD', shell=True).strip()
+    git_describe_v = subprocess.check_output('git describe --match=v3\*', shell=True).strip()
     if not git_describe:
         git_describe = subprocess.check_output('git describe', shell=True).strip()
-        git_describe_v = subprocess.check_output('git describe --match=v3\*', shell=True).strip()
 
 cc_cmd = "gcc -v 2>&1"
 if cross_compile:
