@@ -11,7 +11,6 @@ dry_run = False
 boot_defconfigs = {
     'bcm_defconfig': (),
     'davinci_all_defconfig': (),
-    'da8xx_omapl_defconfig': (),
     'exynos_defconfig': (),
     'imx_v6_v7_defconfig': (),
     'qcom_defconfig': (),
