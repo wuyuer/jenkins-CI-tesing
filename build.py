@@ -23,6 +23,7 @@ cross_compilers = {
     "arm64": "aarch64-linux-gnu-",
     "i386": None,
     "x86": None,
+    "x86_64": None,
 }
 
 # Defaults
@@ -398,4 +399,6 @@ if install:
 if kconfig_tmpfile:
     os.unlink(kconfig_tmpfile)
 
+if result:
+    subprocess.call("cat %s" %build_log, shell=True)
 sys.exit(result)
