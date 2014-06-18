@@ -4,6 +4,7 @@
 #
 import os, sys, glob, re
 import subprocess, fileinput
+import struct
 
 skip_existing_logs = True
 dry_run = False
@@ -46,6 +47,7 @@ board_map = {
     'exynos5250-arndale.dtb': ('arndale', ),
     'exynos5420-arndale-octa.dtb': ('octa', ),
     'exynos5410-smdk5410.dtb': ('odroid-xu', ),
+#    'exynos5800-peach-pi.dtb': ('chromebook2', ),
 
     # sunxi
     'sun4i-a10-cubieboard.dtb': ('cubie', ),
@@ -90,6 +92,17 @@ base = os.path.dirname(dir)
 cwd = os.getcwd()
 retval = 0
 
+def zimage_is_big_endian(kimage):
+    """Check zImage for 'setend be' instruction just after magic headers."""
+    setend_offset = 0x30
+    setend_be = 0xf1010200
+    fp = open(kimage, "r")
+    fp.seek(setend_offset)
+    instr = struct.unpack("<L", fp.read(4))[0]
+    fp.close()
+    if instr == setend_be:
+        return True
+
 def boot_boards(zImage, dtb, boards):
     if dtb:
         dtb_l = os.path.join(dtb_base, dtb)
@@ -116,12 +129,8 @@ def boot_boards(zImage, dtb, boards):
         # Check endianness of zImage
         endian = "little"
         initrd = ""
-        out = subprocess.check_output("file %s" %zImage, shell=True).strip()
-        f, magic = out.split(":", 1)
-        m = re.search(".*\((\w+)-endian\)", magic)
-        if m:
-            endian = m.group(1)
-        if endian == "big":
+        if zimage_is_big_endian(zImage):
+            endian = "big"
             initrd = "/opt/kjh/rootfs/buildroot/armeb/rootfs.cpio.gz"
 
         cmd = 'pyboot -s -l %s %s %s %s %s' \
@@ -171,7 +180,7 @@ for build in os.listdir(dir):
     if '-' in build:
         (arch, defconfig) = build.split('-', 1)
 
-    if not defconfig in boot_defconfigs.keys():
+    if not (defconfig in boot_defconfigs.keys() or defconfig in legacy_map.keys()):
         continue
     
     zImage = 'zImage'
@@ -180,9 +189,21 @@ for build in os.listdir(dir):
         zImage = os.path.join('arch/arm/boot', 'zImage')
         dtb_base = 'arch/arm/boot/dts'
 
+    #
+    # Legacy boot
+    #
+    if legacy_map.has_key(defconfig):
+        boards = legacy_map[defconfig]
+        os.chdir(path)
+        boot_boards(zImage, None, boards)
+        os.chdir(cwd)
+
     # 
     # DT boot
     #
+    if not boot_defconfigs.has_key(defconfig):
+        continue
+
     dtb_list = boot_defconfigs[defconfig]
     for dtb_path in glob.glob('%s/%s/*.dtb' %(path, dtb_base)):
         dtb = os.path.basename(dtb_path)
@@ -207,15 +228,6 @@ for build in os.listdir(dir):
         boards = board_map[dtb]
         os.chdir(path)
         boot_boards(zImage, dtb, boards)
-        os.chdir(cwd)
-
-    #
-    # Legacy boot
-    #
-    if legacy_map.has_key(defconfig):
-        boards = legacy_map[defconfig]
-        os.chdir(path)
-        boot_boards(zImage, None, boards)
         os.chdir(cwd)
 
 sys.exit(retval)
