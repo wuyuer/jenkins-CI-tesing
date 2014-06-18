@@ -3,9 +3,10 @@
 # Options:
 #  -a build all defconfigs (otherwise just 'defconfig' is built)
 #  -b branch name
-#  -c architecture list (space separated, in quotes. otherwise just 'arm' is built)
+#  -c commit ID
 #  -d debug: just print URL, don't fetch it
 #  -f defconfig list (space separated, in quotes)
+#  -l architecture list (space separated, in quotes. otherwise just 'arm' is built)
 #  -n tree name
 #  -p publish
 #  -t tree URL
@@ -29,6 +30,7 @@ params = {
 
 # Options
 debug = False
+commit_id = None
 
 # Defaults
 tree = None
@@ -36,7 +38,7 @@ tree_name = os.environ['USER'] + '-test'
 this_tree = False  # set tree URL based on current git repo
 
 try:
-    opts, args = getopt.getopt(sys.argv[1:], "adb:c:f:n:pt:T")
+    opts, args = getopt.getopt(sys.argv[1:], "adb:c:f:l:n:pt:T:")
 except getopt.GetoptError as err:
     print str(err) # will print something like "option -a not recognized"
     sys.exit(2)
@@ -46,13 +48,15 @@ for o, a in opts:
     if o == "-a":
         all_defconfigs = True
     if o == "-c":
-        params['ARCH_LIST'] = a
+        params['COMMIT_ID'] = a
     if o == "-b":
         params['BRANCH'] = a
     if o == "-d":
         debug = True
     if o == "-f":
         params['DEFCONFIG_LIST'] = a
+    if o == "-l":
+        params['ARCH_LIST'] = a
     if o == "-n":
         tree_name = a
     if o == "-p":
@@ -60,10 +64,10 @@ for o, a in opts:
     if o == "-t":
         tree = a
     if o == "-T":
-        this_tree = True
+        this_tree = a
 
 if this_tree and os.path.exists(".git"):
-    cmd = "git config --get remote.origin.url"
+    cmd = "git config --get remote.%s.url" %this_tree
     tree = subprocess.check_output(cmd, shell=True)
 
 params['TREE_NAME'] = tree_name
