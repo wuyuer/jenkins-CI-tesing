@@ -35,10 +35,13 @@ if not os.path.exists(dir):
 builds = {}
 total_fail_count = 0
 total_pass_count = 0
+total_offline_count = 0
+total_board_count = 0
 for build in os.listdir(dir):
     boards = {}
     build_fail_count = 0
     build_pass_count = 0
+    build_offline_count = 0
     path = os.path.join(dir, build)
     for logfile in glob.glob('%s/boot-*.log' %path):
         (log_prefix, suffix) = os.path.splitext(logfile) 
@@ -50,9 +53,13 @@ for build in os.listdir(dir):
         if r:
             result = r.split(':')[-1].strip()
 
+        total_board_count += 1
         if result == 'PASS':
             build_pass_count += 1
             total_pass_count += 1
+        elif result == 'OFFLINE':
+            build_offline_count += 1
+            total_offline_count += 1
         else:
             build_fail_count += 1
             total_fail_count += 1
@@ -80,7 +87,7 @@ for build in os.listdir(dir):
         boards[board] = (result, time, logfile, warnings)
 
     if len(boards) > 0:
-        builds[build] = (boards, build_fail_count, build_pass_count)
+        builds[build] = (boards, build_fail_count, build_pass_count, build_offline_count)
 
 # Don't send mail if there were no builds
 if len(builds) == 0:
@@ -89,6 +96,10 @@ if len(builds) == 0:
 
 # Extract tree/branch from report header
 (tree_branch, describe, commit) = util.get_header_info(base)
+
+offline_summary = ""
+if total_offline_count:
+    offline_summary = ", %d offline" %total_offline_count
 
 # Unbuffer stdout so 'print' and subprocess output intermingle correctly
 sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)
@@ -100,9 +111,9 @@ if not maillog:
     maillog = tempfile.mktemp(suffix='.log', prefix='boot-report')
 mail_headers = """From: Kevin's boot bot <khilman+build@linaro.org>
 To: %s
-Subject: %s boot: %d pass, %d fail (%s)
+Subject: %s boot: %d boots: %d pass, %d fail (%s)
 
-""" %(mail_to, tree_branch, total_pass_count, total_fail_count, describe)
+""" %(mail_to, tree_branch, total_board_count, total_pass_count, total_fail_count, describe)
 if maillog:
     stdout_save = sys.stdout
     tee = subprocess.Popen(["tee", "%s" %maillog], stdin=subprocess.PIPE)
@@ -126,6 +137,23 @@ if total_fail_count:
         boards = builds[build][0]
         fail_count = builds[build][1]
         if not fail_count:
+            continue
+        for board in boards:
+            report = boards[board]
+            result = report[0]
+            if result != 'PASS':
+                print '%28s: %8s:    %s' %(board, result, build)
+    print
+
+# Offline summary
+if total_offline_count:
+    msg =  "Offline boards (unable to connect to serial console)"
+    print msg
+    print '=' * len(msg)
+    for build in builds:
+        boards = builds[build][0]
+        offline_count = builds[build][3]
+        if not offline_count:
             continue
         for board in boards:
             report = boards[board]
