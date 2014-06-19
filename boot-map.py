@@ -96,11 +96,14 @@ def zimage_is_big_endian(kimage):
     """Check zImage for 'setend be' instruction just after magic headers."""
     setend_offset = 0x30
     setend_be = 0xf1010200
+    setend_be_thumb = 0xb658
     fp = open(kimage, "r")
     fp.seek(setend_offset)
     instr = struct.unpack("<L", fp.read(4))[0]
+    fp.seek(setend_offset)
+    instr_thumb = struct.unpack("<H", fp.read(2))[0]
     fp.close()
-    if instr == setend_be:
+    if (instr == setend_be) or (instr_thumb == setend_be_thumb):
         return True
 
 def boot_boards(zImage, dtb, boards):
