@@ -136,7 +136,7 @@ def boot_boards(zImage, dtb, boards):
             endian = "big"
             initrd = "/opt/kjh/rootfs/buildroot/armeb/rootfs.cpio.gz"
 
-        cmd = 'pyboot -s -l %s %s %s %s %s' \
+        cmd = 'pyboot -w -s -l %s %s %s %s %s' \
               %(logfile, board, zImage, dtb_l, initrd)
 
         if board.startswith('LAVA'):
