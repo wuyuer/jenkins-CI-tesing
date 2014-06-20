@@ -145,7 +145,7 @@ if total_fail_count:
         for board in boards:
             report = boards[board]
             result = report[0]
-            if result != 'PASS':
+            if result == 'FAIL':
                 print '%28s: %8s:    %s' %(board, result, build)
                 print ' ' * 27, "      %s/%s/boot-%s.html" %(url_base, build, board)
     print
@@ -163,7 +163,7 @@ if total_offline_count:
         for board in boards:
             report = boards[board]
             result = report[0]
-            if result != 'PASS':
+            if result == 'OFFLINE':
                 print '%28s: %8s:    %s' %(board, result, build)
     print
 
