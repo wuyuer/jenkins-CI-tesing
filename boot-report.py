@@ -6,6 +6,7 @@ import util
 
 maillog = None
 mail_to = None
+url_base = "http://armcloud.us/kernel-ci"
 
 def usage():
     print "Usage: %s [-m <email address>] <base>" %(sys.argv[0])
@@ -96,6 +97,7 @@ if len(builds) == 0:
 
 # Extract tree/branch from report header
 (tree_branch, describe, commit) = util.get_header_info(base)
+url_base = url_base + "/%s/%s" %(os.path.basename(base), dir)
 
 offline_summary = ""
 if total_offline_count:
@@ -121,6 +123,8 @@ if maillog:
     os.dup2(tee.stdin.fileno(), sys.stderr.fileno())
     print mail_headers
 
+print "Full logs here:", url_base
+print
 if tree_branch:
     print 'Tree/Branch:', tree_branch
 if describe:
@@ -130,7 +134,7 @@ if commit:
 
 # Failure summary
 if total_fail_count:
-    msg =  "Failed boot tests (console logs at the end)"
+    msg =  "Failed boot tests"
     print msg
     print '=' * len(msg)
     for build in builds:
@@ -143,6 +147,7 @@ if total_fail_count:
             result = report[0]
             if result != 'PASS':
                 print '%28s: %8s:    %s' %(board, result, build)
+                print ' ' * 27, "      %s/%s/boot-%s.html" %(url_base, build, board)
     print
 
 # Offline summary
@@ -184,44 +189,6 @@ if total_pass_count:
                 print " (Warnings: %d)" %warnings
             else:
                 print
-
-sep = "=" * 79
-
-if total_fail_count:
-    msg = "Console logs for failures"
-    print
-    print msg
-    print '=' * len(msg)
-    print
-
-# Details for failures
-for build in builds:
-    boards = builds[build][0]
-    fail_count = builds[build][1]
-    if not fail_count:
-        continue
-
-    print build
-    print '-' * len(build)
-    for board in boards:
-        report = boards[board]
-        result = report[0]
-        if result == 'PASS':
-            continue
-
-        n = 40
-        line = '%s: %s: last %d lines of boot log:' %(board, result, n)
-        print
-        print '\t', line
-        print '\t' + '-' * len(line)
-        print
-        logfile = report[2]
-        cmd = "cat %s | tr -d '\r' | tail -n%d"  %(logfile, n)
-        subprocess.call(cmd, shell=True)
-        print
-
-        
-print
 
 # Mail the final report
 if maillog and mail_to:
