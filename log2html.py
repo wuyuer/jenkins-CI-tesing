@@ -34,7 +34,7 @@ if not os.path.exists(log):
 
 base,ext = os.path.splitext(log)
 html = base + ".html"
-base = os.path.basename(log)
+base = os.path.basename(base)
 
 log_f = open(log, "r")
 html_f = open(html, "w")
