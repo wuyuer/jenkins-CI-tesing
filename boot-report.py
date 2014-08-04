@@ -113,9 +113,9 @@ if not maillog:
     maillog = tempfile.mktemp(suffix='.log', prefix='boot-report')
 mail_headers = """From: Kevin's boot bot <khilman+build@linaro.org>
 To: %s
-Subject: %s boot: %d boots: %d pass, %d fail (%s)
+Subject: %s boot: %d boots: %d pass, %d fail%s (%s)
 
-""" %(mail_to, tree_branch, total_board_count, total_pass_count, total_fail_count, describe)
+""" %(mail_to, tree_branch, total_board_count, total_pass_count, total_fail_count, offline_summary, describe)
 if maillog:
     stdout_save = sys.stdout
     tee = subprocess.Popen(["tee", "%s" %maillog], stdin=subprocess.PIPE)
