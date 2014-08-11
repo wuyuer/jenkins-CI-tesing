@@ -10,7 +10,7 @@ headers = """
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN">
 <html>
 <head>
-  <title>Board: %s</title>
+  <title>Boot log: %s</title>
   <style type="text/css">
   body { background-color: black; color: white; }
   pre warn { color: #F88017; }
@@ -35,12 +35,15 @@ if not os.path.exists(log):
 base,ext = os.path.splitext(log)
 html = base + ".html"
 base = os.path.basename(base)
+board = base
+if base.startswith("boot-"):
+    board = base[5:]
 
 log_f = open(log, "r")
 html_f = open(html, "w")
 
-html_f.write(headers %base)
-html_f.write("<h1>%s</h1>\n" %base)
+html_f.write(headers %board)
+html_f.write("<h1>Boot log: %s</h1>\n" %board)
 
 errors = subprocess.check_output('grep "^\[ERR\]" %s | cat' %log, shell=True).splitlines()
 num_errors = len(errors)
