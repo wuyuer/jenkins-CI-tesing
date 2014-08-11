@@ -112,10 +112,9 @@ sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)
 if not maillog:
     maillog = tempfile.mktemp(suffix='.log', prefix='boot-report')
 mail_headers = """From: Kevin's boot bot <khilman+build@linaro.org>
-To: %s
 Subject: %s boot: %d boots: %d pass, %d fail%s (%s)
 
-""" %(mail_to, tree_branch, total_board_count, total_pass_count, total_fail_count, offline_summary, describe)
+""" %(tree_branch, total_board_count, total_pass_count, total_fail_count, offline_summary, describe)
 if maillog:
     stdout_save = sys.stdout
     tee = subprocess.Popen(["tee", "%s" %maillog], stdin=subprocess.PIPE)
@@ -190,11 +189,16 @@ if total_pass_count:
             else:
                 print
 
+# if no passing tests, only send mail to me
+if total_pass_count == 0 and mail_to:
+    mail_to = "khilman@linaro.org"
+
 # Mail the final report
 if maillog and mail_to:
     sys.stdout.flush()
     sys.stdout = stdout_save
-    subprocess.check_output('cat %s | msmtp --read-envelope-from -t --' %maillog, shell=True)
+    mail_cmd = 'cat %s | msmtp --read-envelope-from -- %s' %(maillog, mail_to)
+    subprocess.check_output(mail_cmd, shell=True)
 
 if maillog:
     if os.path.exists(maillog):
