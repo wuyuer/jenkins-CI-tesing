@@ -184,7 +184,7 @@ if os.environ.has_key('GIT_DESCRIBE'):
 # Gather env/info
 if os.path.exists('.git'):
     git_commit = subprocess.check_output('git log -n1 --format=%H', shell=True).strip()
-    git_url = subprocess.check_output('git config --get remote.origin.url', shell=True).strip()
+    git_url = subprocess.check_output('git config --get remote.origin.url |cat', shell=True).strip()
     git_branch = subprocess.check_output('git rev-parse --abbrev-ref HEAD', shell=True).strip()
     git_describe_v = subprocess.check_output('git describe --match=v3\*', shell=True).strip()
     if not git_describe:
@@ -263,7 +263,8 @@ if num_errors:
 bmeta = {}
 if install:
     install_path = os.path.join(os.getcwd(), '_install_', git_describe)
-    install_path = os.path.join(install_path, '-'.join([arch, defconfig]))
+    if defconfig:
+        install_path = os.path.join(install_path, '-'.join([arch, defconfig]))
     if len(frag_names):
         install_path += '+' + '+'.join(frag_names)
 
@@ -326,9 +327,6 @@ if install:
         shutil.copy(os.path.join(tmp_mod_dir, modules_tarball), install_path)
         shutil.rmtree(tmp_mod_dir)
 
-    # Generate meta data
-    build_meta = os.path.join(install_path, 'build.meta')
-
     bmeta["build_time"] = round(build_time, 2)
     if result == 0:
         bmeta['build_result'] = "PASS"
@@ -379,13 +377,6 @@ if install:
     bmeta["build_errors"] = num_errors
     bmeta["build_warnings"] = num_warnings
     bmeta["build_platform"] = platform.uname()
-
-    # Create INI format build metatdata
-    f = open(build_meta, 'w')
-    f.write("[DEFAULT]\n") # make it easy for python ConfigParser
-    for key in sorted(bmeta):
-        f.write("%s: %s\n" %(key, bmeta[key]))
-    f.close()
 
     # Create JSON format build metadata
     build_json = os.path.join(install_path, 'build.json')
