@@ -109,18 +109,16 @@ sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)
 #
 #  Log to a file as well as stdout (for sending with msmtp)
 #
-if not maillog:
-    maillog = tempfile.mktemp(suffix='.log', prefix='boot-report')
-mail_headers = """From: Kevin's boot bot <khilman+build@linaro.org>
-Subject: %s boot: %d boots: %d pass, %d fail%s (%s)
+tmplog = tempfile.mktemp(suffix='.log', prefix='boot-report')
+#if not maillog:
+#    maillog = tempfile.mktemp(suffix='.log', prefix='boot-report-mail')
 
-""" %(tree_branch, total_board_count, total_pass_count, total_fail_count, offline_summary, describe)
-if maillog:
+#if maillog:
+if tmplog:
     stdout_save = sys.stdout
-    tee = subprocess.Popen(["tee", "%s" %maillog], stdin=subprocess.PIPE)
+    tee = subprocess.Popen(["tee", "%s" %tmplog], stdin=subprocess.PIPE)
     os.dup2(tee.stdin.fileno(), sys.stdout.fileno())
     os.dup2(tee.stdin.fileno(), sys.stderr.fileno())
-    print mail_headers
 
 print "Full logs here:", url_base
 print
@@ -189,17 +187,33 @@ if total_pass_count:
             else:
                 print
 
+sys.stdout.flush()
+sys.stdout = stdout_save
+
 # if no passing tests, only send mail to me
 if total_pass_count == 0 and mail_to:
     mail_to = "khilman@linaro.org"
 
-# Mail the final report
-if maillog and mail_to:
-    sys.stdout.flush()
-    sys.stdout = stdout_save
-    mail_cmd = 'cat %s | msmtp --read-envelope-from -- %s' %(maillog, mail_to)
-    subprocess.check_output(mail_cmd, shell=True)
+mail_headers = """From: Kevin's boot bot <khilman+build@linaro.org>
+To: %s
+Subject: %s boot: %d boots: %d pass, %d fail%s (%s)
 
+""" %(mail_to, tree_branch, total_board_count, total_pass_count, total_fail_count, offline_summary, describe)
+
+# Create the final report with mail headers
+if maillog:
+    # Write headers
+    fp = open(maillog, "w")
+    fp.write(mail_headers)
+    fp.close()
+
+    subprocess.call("cat %s >> %s" %(tmplog, maillog), shell=True)
+    mail_cmd = 'cat %s | msmtp --read-envelope-from -t --' %(maillog)
+    if mail_to:
+        subprocess.check_output(mail_cmd, shell=True)
+
+if tmplog and os.path.exists(tmplog):
+    os.remove(tmplog)
 if maillog:
     if os.path.exists(maillog):
         if maillog.startswith('/tmp'):
