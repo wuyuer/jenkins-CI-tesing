@@ -7,6 +7,7 @@ import util
 maillog = None
 mail_to = None
 url_base = "http://armcloud.us/kernel-ci"
+status_url_base = "http://status.armcloud.us/boot/all/job"
 
 def usage():
     print "Usage: %s [-m <email address>] <base>" %(sys.argv[0])
@@ -97,7 +98,10 @@ if len(builds) == 0:
 
 # Extract tree/branch from report header
 (tree_branch, describe, commit) = util.get_header_info(base)
-url_base = url_base + "/%s/%s" %(os.path.basename(base), dir)
+
+tree = os.path.basename(base)
+url_base = url_base + "/%s/%s" %(tree, dir)
+status_url = status_url_base + "/%s/kernel/%s/" %(tree, dir)
 
 offline_summary = ""
 if total_offline_count:
@@ -120,7 +124,7 @@ if tmplog:
     os.dup2(tee.stdin.fileno(), sys.stdout.fileno())
     os.dup2(tee.stdin.fileno(), sys.stderr.fileno())
 
-print "Full logs here:", url_base
+print "Status report database: ", status_url
 print
 if tree_branch:
     print 'Tree/Branch:', tree_branch
