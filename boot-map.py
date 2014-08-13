@@ -15,7 +15,7 @@ boot_defconfigs = {
     'exynos_defconfig': (),
     'imx_v6_v7_defconfig': (),
     'qcom_defconfig': (),
-    'multi_v7_defconfig+CONFIG_ARM_LPAE=y': ('sun7i-a20-cubieboard2.dtb', 'omap5-uevm.dtb', 'armada-xp-openblocks-ax3-4.dtb', 'tegra124-jetson-tk1.dtb', ),
+    'multi_v7_defconfig+CONFIG_ARM_LPAE=y': ('sun7i-a20-cubieboard2.dtb', 'omap5-uevm.dtb', 'armada-xp-openblocks-ax3-4.dtb', 'tegra124-jetson-tk1.dtb', 'exynos5250-arndale.dtb', 'exynos5410-smdk5410.dtb', 'exynos5420-arndale-octa.dtb', 'exynos5800-peach-pi.dtb', ),
     'multi_v7_defconfig+CONFIG_CPU_BIG_ENDIAN=y': ('armada-xp-openblocks-ax3-4.dtb', 'armada-370-mirabox.dtb', ),
     'multi_v7_defconfig': (),
     'mvebu_defconfig': (),
@@ -46,8 +46,9 @@ board_map = {
     # Exynos
     'exynos5250-arndale.dtb': ('arndale', ),
     'exynos5420-arndale-octa.dtb': ('octa', ),
+    'exynos5410-odroidxu.dtb': ('odroid-xu', ),
     'exynos5410-smdk5410.dtb': ('odroid-xu', ),
-#    'exynos5800-peach-pi.dtb': ('chromebook2', ),
+    'exynos5800-peach-pi.dtb': ('chromebook2', ),
 
     # sunxi
     'sun4i-a10-cubieboard.dtb': ('cubie', ),
@@ -92,6 +93,17 @@ base = os.path.dirname(dir)
 cwd = os.getcwd()
 retval = 0
 
+def new_zimage_is_big_endian(kimage):
+    """Check zImage big-endian magic number"""
+    magic_offset = 0x30
+    fp = open(kimage, "r")
+    fp.seek(magic_offset)
+    val = struct.unpack("=L", fp.read(4))[0]
+    fp.close()
+    if (val == 0x01020304):
+        return True
+    return False
+
 def zimage_is_big_endian(kimage):
     """Check zImage for 'setend be' instruction just after magic headers."""
     setend_offset = 0x30
@@ -105,6 +117,7 @@ def zimage_is_big_endian(kimage):
     fp.close()
     if (instr == setend_be) or (instr_thumb == setend_be_thumb):
         return True
+    return False
 
 def boot_boards(zImage, dtb, boards):
     if dtb:
@@ -129,10 +142,14 @@ def boot_boards(zImage, dtb, boards):
                 print "Skipping %s.  JSON file exists: %s\n" %(board, json)
                 continue
 
+        if not os.path.exists(zImage):
+            print "Skipping %s.  kernel doesn't exist: %s\n" %(board, json)
+            continue
+
         # Check endianness of zImage
         endian = "little"
         initrd = ""
-        if zimage_is_big_endian(zImage):
+        if new_zimage_is_big_endian(zImage) or zimage_is_big_endian(zImage):
             endian = "big"
             initrd = "/opt/kjh/rootfs/buildroot/armeb/rootfs.cpio.gz"
 
