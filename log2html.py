@@ -5,6 +5,7 @@
 import os
 import sys
 import subprocess
+import json
 
 headers = """
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN">
@@ -34,6 +35,7 @@ if not os.path.exists(log):
 
 base,ext = os.path.splitext(log)
 html = base + ".html"
+jsn = base + ".json"
 base = os.path.basename(base)
 board = base
 if base.startswith("boot-"):
@@ -41,6 +43,12 @@ if base.startswith("boot-"):
 
 log_f = open(log, "r")
 html_f = open(html, "w")
+json_f = open(jsn, "r+")
+boot_json = json.load(json_f)
+json_f.seek(0)
+boot_json["boot_log_html"] = os.path.basename(html)
+json.dump(boot_json, json_f, indent=4, sort_keys=True)
+json_f.close()
 
 html_f.write(headers %board)
 html_f.write("<h1>Boot log: %s</h1>\n" %board)
