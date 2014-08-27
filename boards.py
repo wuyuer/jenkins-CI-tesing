@@ -1,4 +1,7 @@
 #!/usr/bin/env python
+#
+# TODO: get git_describe_v from build.json, and use it for
+#       whitelist/blacklist rules
 
 import os
 import sys
@@ -6,6 +9,8 @@ import json
 import types
 import subprocess
 import struct
+import fileinput
+import re
 
 cfg_dir = "/home/khilman/work/kernel/tools/build-scripts"
 initrd_armel = "/opt/kjh/rootfs/buildroot/arm/rootfs.cpio.gz"
@@ -48,8 +53,26 @@ cwd = os.getcwd()
 
 builds = os.listdir(dir)
 
+board_count = 0
 boot_count = 0
 total_count = 0
+
+# keep track of blacklist, to be removed on the fly
+blacklist = {}
+if os.path.exists('.blacklist'):
+    for line in fileinput.input('.blacklist'):
+        if line.startswith('#') or len(line) <= 1:
+            continue
+        ver_pat, defconfig, dtb = line.split()
+        m = re.search(ver_pat, os.path.basename(dir))
+        if not m:
+            continue
+        if not blacklist.has_key(defconfig):
+            blacklist[defconfig] = list()
+        if dtb == "legacy" or dtb == "None":
+            dtb = "legacy"
+        blacklist[defconfig].append(dtb)
+
 for board in boards.keys():
     a = 0
     c = 0
@@ -94,9 +117,24 @@ for board in boards.keys():
         for defconfig in b["defconfig"]:
             d = "%s-%s" %(arch, defconfig)
             for build in builds:
+                build_json = os.path.join(dir, d, "build.json")
                 if build != d:
                     continue;
 
+                fp = open(build_json, "r")
+                build_meta = json.load(fp)
+                fp.close()
+                if build_meta.has_key("build_result") and build_meta["build_result"] == "PASS":
+                    # Successful build
+                    pass
+                else:
+                    print "WARNING: Build failed/missing for: %s" %d
+                    continue
+
+                git_describe = None
+                if build_meta.has_key("git_describe_v"):
+                    git_describe = build_meta["git_describe_v"]
+                
                 os.chdir(os.path.join(dir, build))
 
                 kimage = "zImage"
@@ -113,6 +151,7 @@ for board in boards.keys():
                     initrd = initrd_arm64
 
                 for dtb in dtbs:
+                    blacklisted = False
                     if dtb:
                         dtb_path = os.path.join("dtbs", dtb) + ".dtb"
                         if not os.path.exists(dtb_path):
@@ -125,6 +164,17 @@ for board in boards.keys():
                     else:
                         dtb_path = "-"
 
+                    # check blacklist
+                    for key in blacklist.keys():
+                        if d.startswith(key):
+                            if dtb and (dtb in blacklist[key]):
+                                blacklisted = True
+                            elif board in blacklist[key]:
+                                blacklisted = True
+                    if blacklisted:
+                        print "\tSkipping %s/%s.  Blacklisted." %(dtb, d)
+                        continue
+                        
                     if dtb == None:  # Legacy
                         #logname = "LEGACY_%s" %board
                         #logname = "legacy,%s" %board
@@ -153,9 +203,10 @@ for board in boards.keys():
 
     print "%d / %d\t%s" %(c, a, board)
     boot_count += c
-#    break
+    board_count += 1
 
 
-print "-------\n%d / %d" %(boot_count, total_count)
+print "-------\n%d / %d Boots." %(boot_count, total_count)
+print board_count, "Boards."
 
 
