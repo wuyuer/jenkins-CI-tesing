@@ -10,22 +10,25 @@ skip_existing_logs = True
 dry_run = False
 
 boot_defconfigs = {
-    'bcm_defconfig': (),
-    'davinci_all_defconfig': (),
-    'exynos_defconfig': (),
-    'imx_v6_v7_defconfig': (),
-    'qcom_defconfig': (),
-    'multi_v7_defconfig+CONFIG_ARM_LPAE=y': ('sun7i-a20-cubieboard2.dtb', 'omap5-uevm.dtb', 'armada-xp-openblocks-ax3-4.dtb', 'tegra124-jetson-tk1.dtb', 'exynos5250-arndale.dtb', 'exynos5410-smdk5410.dtb', 'exynos5420-arndale-octa.dtb', 'exynos5800-peach-pi.dtb', ),
-    'multi_v7_defconfig+CONFIG_CPU_BIG_ENDIAN=y': ('armada-xp-openblocks-ax3-4.dtb', 'armada-370-mirabox.dtb', ),
-    'multi_v7_defconfig': (),
-    'mvebu_defconfig': (),
-    'mvebu_v7_defconfig': (),
-    'mvebu_v7_defconfig+CONFIG_CPU_BIG_ENDIAN=y': ('armada-xp-openblocks-ax3-4.dtb', 'armada-370-mirabox.dtb', ),
-    'omap2plus_defconfig': (),
-    'sama5_defconfig': (),
-    'sunxi_defconfig': (),
-    'tegra_defconfig': (),
-    'u8500_defconfig': (),
+    'arm-bcm_defconfig': (),
+    'arm-davinci_all_defconfig': (),
+    'arm-exynos_defconfig': (),
+    'arm-imx_v6_v7_defconfig': (),
+    'arm-qcom_defconfig': (),
+    'arm-multi_v7_defconfig+CONFIG_ARM_LPAE=y': ('sun7i-a20-cubieboard2.dtb', 'omap5-uevm.dtb', 'armada-xp-openblocks-ax3-4.dtb', 'tegra124-jetson-tk1.dtb', 'exynos5250-arndale.dtb', 'exynos5410-smdk5410.dtb', 'exynos5420-arndale-octa.dtb', 'exynos5800-peach-pi.dtb', 'vexpress-v2p-ca15-tc1.dtb', ),
+    'arm-multi_v7_defconfig+CONFIG_CPU_BIG_ENDIAN=y': ('armada-xp-openblocks-ax3-4.dtb', 'armada-370-mirabox.dtb',),
+    'arm-multi_v7_defconfig': (),
+    'arm-mvebu_defconfig': (),
+    'arm-mvebu_v7_defconfig': (),
+    'arm-mvebu_v7_defconfig+CONFIG_CPU_BIG_ENDIAN=y': ('armada-xp-openblocks-ax3-4.dtb', 'armada-370-mirabox.dtb', ),
+    'arm-omap2plus_defconfig': (),
+    'arm-sama5_defconfig': (),
+    'arm-sunxi_defconfig': (),
+    'arm-tegra_defconfig': (),
+    'arm-u8500_defconfig': (),
+    'arm-shmobile_defconfig': (),
+    'arm-vexpress_defconfig': (),
+    'arm64-defconfig': (),
 }
 
 board_map = {
@@ -80,12 +83,25 @@ board_map = {
 
     # Davinci
     'da850-evm.dtb': ('da850evm', ),
+
+    # shmobile
+    'emev2-kzm9d.dtb': ('kzm9d', ),
+
+    # ARM
+    'vexpress-v2p-ca15-tc1.dtb': ('vexpress-v2p-ca15', ),
+    'vexpress-v2p-ca9.dtb': ('vexpress-v2p-ca9', ),
+
+    # Xilinx
+    'zynq-zc702.dtb': ('zynq', ),
     }
 
 legacy_map = {
-    'da8xx_omapl_defconfig': ('da850evm', ), 
-    'davinci_all_defconfig': ('dm365evm', ),
-    'omap2plus_defconfig': ('3530beagle', '3730xm', '3530overo', '3730storm', 'n900', ),
+    'arm-da8xx_omapl_defconfig': ('da850evm', ), 
+    'arm-davinci_all_defconfig': ('dm365evm', ),
+    'arm-omap2plus_defconfig': ('3530beagle', '3730xm', '3530overo', '3730storm', 'n900', ),
+    'arm-versatile_defconfig': ('versatilepb', ),
+    'arm-vexpress_defconfig': ('vexpress-v2p-ca9', ),
+    'arm64-defconfig': ('qemu-aarch64', ),
 }
 
 dir = os.path.abspath(sys.argv[1])
@@ -196,24 +212,28 @@ for build in os.listdir(dir):
     if not os.path.isdir(path):
         continue
 
+    arch = 'arm'
     defconfig = build
     if '-' in build:
         (arch, defconfig) = build.split('-', 1)
 
-    if not (defconfig in boot_defconfigs.keys() or defconfig in legacy_map.keys()):
+    if not (build in boot_defconfigs.keys() or build in legacy_map.keys()):
         continue
-    
+
     zImage = 'zImage'
+    if arch == 'arm64':
+        zImage = 'Image'
+
     dtb_base = 'dtbs'
-    if os.path.exists(os.path.join(path, 'arch/arm/boot')):
-        zImage = os.path.join('arch/arm/boot', 'zImage')
-        dtb_base = 'arch/arm/boot/dts'
+    if os.path.exists(os.path.join(path, 'arch/%s/boot' %arch)):
+        zImage = os.path.join('arch/%s/boot', 'zImage' %arch)
+        dtb_base = 'arch/%s/boot/dts' %arch
 
     #
     # Legacy boot
     #
-    if legacy_map.has_key(defconfig):
-        boards = legacy_map[defconfig]
+    if legacy_map.has_key(build):
+        boards = legacy_map[build]
         os.chdir(path)
         boot_boards(zImage, None, boards)
         os.chdir(cwd)
@@ -221,10 +241,10 @@ for build in os.listdir(dir):
     # 
     # DT boot
     #
-    if not boot_defconfigs.has_key(defconfig):
+    if not boot_defconfigs.has_key(build):
         continue
 
-    dtb_list = boot_defconfigs[defconfig]
+    dtb_list = boot_defconfigs[build]
     for dtb_path in glob.glob('%s/%s/*.dtb' %(path, dtb_base)):
         dtb = os.path.basename(dtb_path)
 
