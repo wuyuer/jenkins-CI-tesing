@@ -196,7 +196,7 @@ for board in boards.keys():
                             continue
 
 #                    print "\t", console, d, dtb_path
-                    cmd = "pyboot -s -l %s %s %s %s %s" %(logfile, console, kimage, dtb_path, initrd)
+                    cmd = "pyboot -w -s -l %s %s %s %s %s" %(logfile, console, kimage, dtb_path, initrd)
                     print "\t", d, cmd
                     subprocess.call(cmd, shell=True)
                     c += 1
