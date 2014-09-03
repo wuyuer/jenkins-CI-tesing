@@ -198,7 +198,7 @@ sys.stdout = stdout_save
 if total_pass_count == 0 and mail_to:
     mail_to = "khilman@linaro.org"
 
-mail_headers = """From: Kevin's boot bot <khilman+build@linaro.org>
+mail_headers = """From: Kevin's boot bot <khilman@ished.com>
 To: %s
 Subject: %s boot: %d boots: %d pass, %d fail%s (%s)
 
