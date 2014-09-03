@@ -205,6 +205,13 @@
         ]
     }, 
 
+    "at91-sama5d3_xplained": {
+	"console": "xplained",
+	"defconfig": [
+            "sama5_defconfig"
+	]
+    },
+
     "ste-snowball": {
 	"console": "snowball",
         "defconfig": [
