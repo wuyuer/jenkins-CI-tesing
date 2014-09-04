@@ -124,12 +124,9 @@ for board in boards.keys():
                 fp = open(build_json, "r")
                 build_meta = json.load(fp)
                 fp.close()
-                if build_meta.has_key("build_result") and build_meta["build_result"] == "PASS":
-                    # Successful build
-                    pass
-                else:
+                build_result = build_meta.get("build_result", "UNKNOWN")
+                if build_result != "PASS":
                     print "WARNING: Build failed/missing for: %s" %d
-                    continue
 
                 git_describe = None
                 if build_meta.has_key("git_describe_v"):
@@ -140,15 +137,15 @@ for board in boards.keys():
                 kimage = "zImage"
                 if arch == "arm64":
                     kimage = "Image"
-                if not os.path.exists(kimage):
+                if os.path.exists(kimage):
+                    initrd = initrd_armel
+                    if zimage_is_big_endian(kimage):
+                        initrd = initrd_armeb
+                        if arch == "arm64":
+                            initrd = initrd_arm64
+                else:
                     print "WARNING: kernel doesn't exist:", build, kimage
 #                    continue
-
-                initrd = initrd_armel
-                if zimage_is_big_endian(kimage):
-                    initrd = initrd_armeb
-                if arch == "arm64":
-                    initrd = initrd_arm64
 
                 for dtb in dtbs:
                     blacklisted = False
