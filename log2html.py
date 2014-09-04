@@ -77,7 +77,7 @@ else:
 html_f.write("<h2>Errors: %d</h2>" %num_errors)
 if num_errors:
     for e in errors:
-        html_f.write("<err>%s</err>" %e.rstrip())
+        html_f.write("<err>%s</err>\n" %e.rstrip())
     html_f.write("\n")
 
 html_f.write("<h2>Warnings: %d</h2>" %num_warnings)
