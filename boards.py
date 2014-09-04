@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 #
-# TODO: get git_describe_v from build.json, and use it for
-#       whitelist/blacklist rules
 
 import os
 import sys
@@ -174,8 +172,7 @@ for board in boards.keys():
                         
                     if dtb == None:  # Legacy
                         #logname = "LEGACY_%s" %board
-                        #logname = "legacy,%s" %board
-                        logname = "legacy,%s" %console
+                        logname = "legacy,%s" %board                        
                     else:
                         logname = board
 
