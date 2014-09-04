@@ -3,6 +3,7 @@
 import os, sys, subprocess, glob
 import tempfile, getopt
 import util
+import json
 
 maillog = None
 mail_to = None
@@ -45,15 +46,14 @@ for build in os.listdir(dir):
     build_pass_count = 0
     build_offline_count = 0
     path = os.path.join(dir, build)
-    for logfile in glob.glob('%s/boot-*.log' %path):
-        (log_prefix, suffix) = os.path.splitext(logfile) 
-        board = os.path.basename(log_prefix)[5:] # drop 'boot-'
+    for jsonfile in glob.glob('%s/boot-*.json' %path):
+        (prefix, suffix) = os.path.splitext(jsonfile) 
+        board = os.path.basename(prefix)[5:] # drop 'boot-'
 
-        result = 'DEAD'
-        r = subprocess.check_output('tail -4 %s | grep --text Result: | cat' %logfile,
-                                    shell=True)
-        if r:
-            result = r.split(':')[-1].strip()
+        fp = open(jsonfile)
+        boot_meta = json.load(fp)
+        fp.close()
+        result = boot_meta.get("boot_result", "UNKNOWN")
 
         total_board_count += 1
         if result == 'PASS':
@@ -66,27 +66,9 @@ for build in os.listdir(dir):
             build_fail_count += 1
             total_fail_count += 1
 
-        warnings = 0
-        l = subprocess.check_output('tail -4 %s | grep --text Warnings: | cat' %logfile,
-                                    shell=True)
-        if l:
-            w = l.split(':')[2]
-            try:
-                warnings = int(w)
-            except ValueError:
-                continue
-
-        time = 0
-        l = subprocess.check_output('tail -4 %s | grep --text Time: | cat' %logfile,
-                                    shell=True)
-        if l:
-            t = l.split(':')[2]
-            try:
-                time = float(t.split()[0].strip())
-            except ValueError:
-                time = -1
-
-        boards[board] = (result, time, logfile, warnings)
+        warnings = boot_meta.get("boot_warnings", 0)
+        time = boot_meta.get("boot_time", -1)
+        boards[board] = (result, time, warnings)
 
     if len(boards) > 0:
         builds[build] = (boards, build_fail_count, build_pass_count, build_offline_count)
@@ -182,8 +164,7 @@ if total_pass_count:
             report = boards[board]
             result = report[0]
             time = report[1]
-            logfile = report[2]
-            warnings = report[3]
+            warnings = report[2]
             print "%28s     %d min %4.1f sec: %8s" \
                 %(board, time / 60, time % 60, result, ),
             if warnings:
