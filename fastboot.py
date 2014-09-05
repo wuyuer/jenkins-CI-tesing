@@ -32,16 +32,12 @@ if len(args) > 2:
     if initrd == 'None':
         initrd = None
 
-print sys.argv
-print sys.argv[0], board, kernel, dtb, initrd
+print "Running:", sys.argv[0], board, kernel, dtb, initrd
 
 boards = {
     'dragon': ("25001b4", "boot", "console=ttyMSM0,115200,n8 debug earlyprintk"),
     'capri': ("1234567890", "flash", ""),
-#    'n900': (None, "nolo", "console=ttyO2,115200n8 debug earlyprintk root=/dev/ram"),
-    'n900': (None, "nolo", "console=ttyO2,115200n8 debug earlyprintk rw rootwait root=/dev/mmcblk0p2"),
-#    'n900': (None, "nolo", "init=/sbin/preinit ubi.mtd=rootfs root=ubi0:rootfs rootfstype=ubifs rootflags=bulk_read,no_chk_data_crc rw console=ttyMTD,log console=tty0 console=ttyO2,115200n8 debug init=/bin/sh"),
-#    'n900': (None, "nolo", "ubi.mtd=rootfs root=ubi0:initfs rootfstype=ubifs rootflags=bulk_read,no_chk_data_crc rw console=ttyMTD,log console=tty0 console=ttyO2,115200n8 debug init=/bin/sh"),
+    'n900': (None, "nolo", None)
 }
 
 kernel_l = ''
@@ -84,6 +80,16 @@ try:
         print 'TFTP: download dtb (%s) to %s' %(dtb, dtb_l)
         client.download(dtb, dtb_l)
 
+        # Check if DTB has command-line
+        try:
+            dtb_cmdline = subprocess.check_output("fdtget %s /chosen bootargs" %dtb_l, shell=True).strip()
+            print "INFO: Using commandline from DTB: ", dtb_cmdline
+            if dtb_cmdline:
+                cmdline = dtb_cmdline
+        except subprocess.CalledProcessError:
+            # fdtget returned non-zero
+            pass
+
     if initrd:
         fd, initrd_l = tempfile.mkstemp(prefix='initrd-')
         print 'TFTP: download initrd (%s) to %s' %(initrd, initrd_l)
@@ -98,7 +104,10 @@ if fastboot_cmd == 'boot':
     cmd = "cat %s >> %s" %(dtb_l, kernel_l)
     subprocess.call(cmd, shell=True)
 
-    cmd = 'fastboot -s %s -c "%s" boot %s %s' %(id, cmdline, kernel_l, initrd_l)
+    cmd = "fastboot -s %s " %id
+    if cmdline:
+        cmd += '-c "%s" ' %cmdline 
+    cmd += "boot %s %s" %(kernel_l, initrd_l)
     print cmd
     subprocess.call(cmd, shell=True)
 
@@ -126,6 +135,7 @@ elif fastboot_cmd == 'nolo':
     cmd += "-b"
     if cmdline:
         cmd += '"%s" ' %cmdline
+    print cmd
     subprocess.call(cmd, shell=True)
 
 cleanup()
