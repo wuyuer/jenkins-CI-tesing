@@ -122,9 +122,6 @@ for board in boards.keys():
                 fp = open(build_json, "r")
                 build_meta = json.load(fp)
                 fp.close()
-                build_result = build_meta.get("build_result", "UNKNOWN")
-                if build_result != "PASS":
-                    print "WARNING: Build failed/missing for: %s" %d
 
                 git_describe = None
                 if build_meta.has_key("git_describe_v"):
@@ -139,11 +136,8 @@ for board in boards.keys():
                     initrd = initrd_armel
                     if zimage_is_big_endian(kimage):
                         initrd = initrd_armeb
-                        if arch == "arm64":
-                            initrd = initrd_arm64
-                else:
-                    print "WARNING: kernel doesn't exist:", build, kimage
-#                    continue
+                    if arch == "arm64":
+                        initrd = initrd_arm64
 
                 for dtb in dtbs:
                     blacklisted = False
@@ -188,11 +182,19 @@ for board in boards.keys():
                         if boot_json["boot_result"] == "PASS":
                             print "\t%s/%s: Boot JSON reports PASS.  Skipping." %(board, d)
                             continue
+                    
+                    build_result = build_meta.get("build_result", "UNKNOWN")
+                    if build_result != "PASS":
+                        print "\t%s%s: WARNING: Build failed.  Creating %s" %(board, d, jsonfile)
+                        boot_json = {"boot_result": "BUILD_FAIL"}
+                        fp = open(jsonfile, "w")
+                        json.dump(boot_json, fp)
+                        fp.close()
+                    else:
+                        cmd = "pyboot -w -s -l %s %s %s %s %s" %(logfile, console, kimage, dtb_path, initrd)
+                        print "\t", d, cmd
+                        subprocess.call(cmd, shell=True)
 
-#                    print "\t", console, d, dtb_path
-                    cmd = "pyboot -w -s -l %s %s %s %s %s" %(logfile, console, kimage, dtb_path, initrd)
-                    print "\t", d, cmd
-                    subprocess.call(cmd, shell=True)
                     c += 1
 
     print "%d / %d\t%s" %(c, a, board)
