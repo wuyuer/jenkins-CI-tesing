@@ -68,6 +68,16 @@
         ]
     }, 
 
+    "exynos5422-odroid-xu3": {
+	"console": "odroid-xu3",
+	"LPAE": true,
+	"dtb": "exynos5420-smdk5420",
+        "defconfig": [
+            "exynos_defconfig", 
+            "multi_v7_defconfig"
+        ]
+    }, 
+
     "exynos5420-arndale-octa": {
 	"LPAE": true,
 	"console": "octa",
@@ -298,6 +308,14 @@
 	"defconfig": [
 	    "defconfig"
 	]
+    },
+
+    "am437x-gp-evm": {
+	"console": "am43xevm",
+        "defconfig": [
+            "multi_v7_defconfig", 
+            "omap2plus_defconfig"
+        ]
     }
 }
 
