@@ -131,6 +131,10 @@ if total_fail_count:
             if result == 'FAIL':
                 print '%28s: %8s:    %s' %(board, result, build)
                 print ' ' * 27, "      %s/%s/boot-%s.html" %(url_base, build, board)
+            elif result == 'BUILD_FAIL':
+                print '%28s: %8s:    %s' %(board, result, build)
+                print ' ' * 27, "      %s/%s/build.log" %(url_base, build)
+                
     print
 
 # Offline summary
