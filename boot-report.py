@@ -8,7 +8,8 @@ import json
 maillog = None
 mail_to = None
 url_base = "http://armcloud.us/kernel-ci"
-status_url_base = "http://status.armcloud.us/boot/all/job"
+boot_url_base = "http://status.armcloud.us/boot/all/job"
+build_url_base = "http://status.armcloud.us/build/"
 
 def usage():
     print "Usage: %s [-m <email address>] <base>" %(sys.argv[0])
@@ -84,7 +85,8 @@ if len(builds) == 0:
 
 tree = os.path.basename(base)
 url_base = url_base + "/%s/%s" %(tree, dir)
-status_url = status_url_base + "/%s/kernel/%s/" %(tree, dir)
+boot_url = boot_url_base + "/%s/kernel/%s/" %(tree, dir)
+build_url = build_url_base + "/%s/kernel/%s/" %(tree, dir)
 
 offline_summary = ""
 if total_offline_count:
@@ -107,7 +109,8 @@ if tmplog:
     os.dup2(tee.stdin.fileno(), sys.stdout.fileno())
     os.dup2(tee.stdin.fileno(), sys.stderr.fileno())
 
-print "Status report database: ", status_url
+print "Full Build report:", build_url
+print "Full Boot report: ", boot_url
 print
 if tree_branch:
     print 'Tree/Branch:', tree_branch
@@ -115,6 +118,7 @@ if describe:
     print 'Git describe:', describe
 if commit:
     print 'Commit:', commit
+print
 
 # Failure summary
 if total_fail_count:
