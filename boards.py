@@ -165,8 +165,7 @@ for board in boards.keys():
                         continue
                         
                     if dtb == None:  # Legacy
-                        #logname = "LEGACY_%s" %board
-                        logname = "legacy,%s" %board                        
+                        logname = "%s,legacy" %board                        
                     else:
                         logname = board
 
@@ -186,7 +185,8 @@ for board in boards.keys():
                     build_result = build_meta.get("build_result", "UNKNOWN")
                     if build_result != "PASS":
                         print "\t%s%s: WARNING: Build failed.  Creating %s" %(board, d, jsonfile)
-                        boot_json = {"boot_result": "BUILD_FAIL"}
+                        boot_json = {"boot_result": "FAIL"}
+                        boot_json["boot_result_description"] = "Kernel build failed. Unable to boot."
                         fp = open(jsonfile, "w")
                         json.dump(boot_json, fp)
                         fp.close()
