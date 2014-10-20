@@ -316,6 +316,14 @@
             "multi_v7_defconfig", 
             "omap2plus_defconfig"
         ]
+    },
+
+    "rk3288-evb-rk808": {
+	"console": "rk3288-evb",
+	"LPAE": true,
+        "defconfig": [
+            "multi_v7_defconfig"
+        ]
     }
 }
 
