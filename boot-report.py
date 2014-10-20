@@ -67,8 +67,9 @@ for build in os.listdir(dir):
             total_fail_count += 1
 
         warnings = boot_meta.get("boot_warnings", 0)
-        time = boot_meta.get("boot_time", -1)
-        boards[board] = (result, time, warnings)
+        time = boot_meta.get("boot_time", 0)
+        result_desc = boot_meta.get("boot_result_description", None)
+        boards[board] = (result, time, warnings, result_desc)
 
     if len(boards) > 0:
         builds[build] = (boards, build_fail_count, build_pass_count, build_offline_count)
@@ -128,12 +129,15 @@ if total_fail_count:
         for board in boards:
             report = boards[board]
             result = report[0]
+            result_desc = report[3]
             if result == 'FAIL':
                 print '%28s: %8s:    %s' %(board, result, build)
-                print ' ' * 27, "      %s/%s/boot-%s.html" %(url_base, build, board)
-            elif result == 'BUILD_FAIL':
-                print '%28s: %8s:    %s' %(board, result, build)
-                print ' ' * 27, "      %s/%s/build.log" %(url_base, build)
+                if result_desc:
+                    print ' ' * 33, result_desc
+                if result_desc and result_desc.startswith("Kernel build failed"):
+                    print ' ' * 27, "      %s/%s/build.log" %(url_base, build)
+                else:
+                    print ' ' * 27, "      %s/%s/boot-%s.html" %(url_base, build, board)
                 
     print
 
@@ -169,10 +173,13 @@ if total_pass_count:
             result = report[0]
             time = report[1]
             warnings = report[2]
+            result_desc = report[3]
             print "%28s     %d min %4.1f sec: %8s" \
                 %(board, time / 60, time % 60, result, ),
             if warnings:
                 print " (Warnings: %d)" %warnings
+            elif result_desc:
+                print " -", result_desc
             else:
                 print
 
@@ -183,7 +190,7 @@ sys.stdout = stdout_save
 if total_pass_count == 0 and mail_to:
     mail_to = "khilman@linaro.org"
 
-mail_headers = """From: Kevin's boot bot <khilman@ished.com>
+mail_headers = """From: Kevin's boot bot <khilman@kernel.org>
 To: %s
 Subject: %s boot: %d boots: %d pass, %d fail%s (%s)
 
