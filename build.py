@@ -171,8 +171,8 @@ if ccache and len(ccache):
     if os.environ.has_key('CCACHE_DIR'):
         ccache_dir = os.environ['CCACHE_DIR']
     else:
-        #ccache_dir = os.path.join(os.getcwd(), '.ccache' + '-' + arch)
-        ccache_dir = os.path.join(os.getcwd(), '.ccache')
+        ccache_dir = os.path.join(os.getcwd(), '.ccache' + '-' + arch)
+        #ccache_dir = os.path.join(os.getcwd(), '.ccache')
         os.environ['CCACHE_DIR'] = ccache_dir
 else:
     ccache_dir = None
