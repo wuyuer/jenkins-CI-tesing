@@ -37,7 +37,9 @@ print "Running:", sys.argv[0], board, kernel, dtb, initrd
 boards = {
     'dragon': ("25001b4", "boot", "console=ttyMSM0,115200,n8 debug earlyprintk"),
     'capri': ("1234567890", "flash", ""),
-    'n900': (None, "nolo", None)
+    'n900': (None, "nolo", None),
+    'z1': ("BH9006CT08", "sony", "console=ttyMSM,115200,n8 debug"),
+    'rk3288-evb': (None, "rockchip", None),
 }
 
 kernel_l = ''
@@ -76,7 +78,7 @@ try:
     client.download(kernel, kernel_l, timeout=60)
 
     if dtb:
-        fd, dtb_l = tempfile.mkstemp(prefix='dtb-')
+        fd, dtb_l = tempfile.mkstemp(prefix='dtb-', suffix=".dtb")
         print 'TFTP: download dtb (%s) to %s' %(dtb, dtb_l)
         client.download(dtb, dtb_l)
 
@@ -138,5 +140,63 @@ elif fastboot_cmd == 'nolo':
     print cmd
     subprocess.call(cmd, shell=True)
 
-cleanup()
+elif fastboot_cmd == "sony":
+    fd, bootimg = tempfile.mkstemp(prefix="boot.img")
+    mkbootimg_args = "--base 0x00000000 --pagesize 2048 --ramdisk_offset 0x02000000 --tags_offset 0x01e00000 "
+    cmd = "/usr/local/bin/mkqcdtbootimg %s --output %s --kernel %s " %(mkbootimg_args, bootimg, kernel_l)
+    if initrd_l:
+        cmd += "--ramdisk %s " %initrd_l
+    if cmdline:
+	cmd += '--cmdline "%s" ' %cmdline
+    if dtb_l:
+        cmd += "--dt_dir %s " %os.path.dirname(dtb_l)
+    print cmd
+    subprocess.call(cmd, shell=True)
+
+#    subprocess.call("hexdump -C %s | head -20" %bootimg, shell=True)
+    bootimg_size = os.path.getsize(bootimg)
+    if bootimg_size <= 0:
+        print "ERROR: boot.img size is %d.  Giving up." %bootimg_size
+
+    cmd = "fastboot -s %s erase boot" %id
+    print "INFO: Erasing boot partition:", cmd
+    subprocess.call(cmd, shell=True)
+
+    cmd = "fastboot -s %s flash boot %s" %(id, bootimg)
+    print "INFO: Flashing boot partition:", cmd
+    subprocess.call(cmd, shell=True)
+
+    print "INFO: Rebooting"
+    tty = open("/home/khilman/dev/z1-1", "w")
+    tty.write("pvabc")
+    time.sleep(1)
+    tty.write("PA")
+    tty.close()
+
+elif fastboot_cmd == "rockchip":
+    os.chdir("/home/khilman/work.local/platforms/rockchip")
+
+    # requires DTB appended
+    cmd = "cat %s >> %s" %(dtb_l, kernel_l)
+    subprocess.call(cmd, shell=True)
+
+    # erase kernel at beginning of eMMC
+    cmd = "./bin/rkflashtool w 0x0 0x8000 < /dev/zero"
+    subprocess.call(cmd, shell=True)
+
+    # write kernel to beginning of eMMC
+    cmd = "./bin/rkflashtool w 0x0 0x8000 < %s" %kernel_l
+    subprocess.call(cmd, shell=True)
+
+    # write initrd to eMMC
+    if initrd_l:
+        cmd = "./bin/rkflashtool w 0x10000 0x8000 < %s" %initrd_l
+        subprocess.call(cmd, shell=True)
+
+    # reboot (default u-boot env set to boot kernel from MMC)
+    cmd = "./bin/rkflashtool b"
+    subprocess.call(cmd, shell=True)
+
+
+#cleanup()
 
