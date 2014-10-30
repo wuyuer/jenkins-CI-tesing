@@ -139,6 +139,10 @@ for board in boards.keys():
                     if arch == "arm64":
                         initrd = initrd_arm64
 
+                modules = "modules.tar.xz"
+                if not os.path.exists(modules):
+                    modules = None
+
                 for dtb in dtbs:
                     blacklisted = False
                     if dtb:
@@ -191,7 +195,10 @@ for board in boards.keys():
                         json.dump(boot_json, fp)
                         fp.close()
                     else:
-                        cmd = "pyboot -w -s -l %s %s %s %s %s" %(logfile, console, kimage, dtb_path, initrd)
+                        cmd = "pyboot -w -s -l %s" %(logfile)
+                        if modules:
+                            cmd += " -m %s" %modules
+                        cmd += " %s %s %s %s" %(console, kimage, dtb_path, initrd)
                         print "\t", d, cmd
                         subprocess.call(cmd, shell=True)
 
