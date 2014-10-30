@@ -59,6 +59,7 @@
     }, 
 
     "exynos5410-smdk5410": {
+	"disabled": "true",
 	"console": "odroid-xu",
 	"LPAE": true,
 	"dtb": ["exynos5410-smdk5410", "exynos5410-odroidxu"],
@@ -324,6 +325,14 @@
         "defconfig": [
             "multi_v7_defconfig"
         ]
-    }
+    },
+
+   "qcom-msm8974-sony-xperia-honami": {
+       "console": "z1",
+        "defconfig": [
+            "multi_v7_defconfig", 
+            "qcom_defconfig"
+        ]
+   }
 }
 
