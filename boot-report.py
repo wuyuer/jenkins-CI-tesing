@@ -7,7 +7,7 @@ import json
 
 maillog = None
 mail_to = None
-url_base = "http://armcloud.us/kernel-ci"
+url_base = "http://storage.armcloud.us/kernel-ci"
 boot_url_base = "http://status.armcloud.us/boot/all/job"
 build_url_base = "http://status.armcloud.us/build/"
 
