@@ -8,6 +8,7 @@ import tempfile
 import tftpy
 import subprocess
 import time
+import getopt
 
 tftp_server = '192.168.1.2'
 
@@ -19,7 +20,17 @@ if len(sys.argv) < 2:
     sys.exit(1)
 
 board = sys.argv[1]
-args = sys.argv[2:]
+
+try:
+    opts,args =  opts, args = getopt.getopt(sys.argv[2:], "t:")
+except getopt.GetoptError as err:
+    print str(err) # will print something like "option -a not recognized"
+    sys.exit(2)
+for o, a in opts:
+    if o == "-t":
+        tftp_server = a
+
+#args = sys.argv[2:]
 kernel = args[0]
 dtb = None
 initrd = None
@@ -32,7 +43,7 @@ if len(args) > 2:
     if initrd == 'None':
         initrd = None
 
-print "Running:", sys.argv[0], board, kernel, dtb, initrd
+print "Running:", " ".join(sys.argv)
 
 boards = {
     'dragon': ("25001b4", "boot", "console=ttyMSM0,115200,n8 debug earlyprintk"),
@@ -116,10 +127,12 @@ if fastboot_cmd == 'boot':
 elif fastboot_cmd == 'flash':
     cmd = 'fastboot -s %s flash kernel %s' %(id, kernel_l)
     subprocess.call(cmd, shell=True)
-    cmd = 'fastboot -s %s flash device-tree %s' %(id, dtb_l)
-    subprocess.call(cmd, shell=True)
-    cmd = 'fastboot -s %s flash initrd %s' %(id, initrd_l)
-    subprocess.call(cmd, shell=True)
+    if dtb_l:
+        cmd = 'fastboot -s %s flash device-tree %s' %(id, dtb_l)
+        subprocess.call(cmd, shell=True)
+    if initrd_l:
+        cmd = 'fastboot -s %s flash initrd %s' %(id, initrd_l)
+        subprocess.call(cmd, shell=True)
     cmd = 'fastboot -s %s -c "%s" continue' %(id, cmdline)
     subprocess.call(cmd, shell=True)
 
@@ -141,6 +154,22 @@ elif fastboot_cmd == 'nolo':
     subprocess.call(cmd, shell=True)
 
 elif fastboot_cmd == "sony":
+    dtb_tmpdir = tempfile.mkdtemp()
+    fd, dtb_qcom = tempfile.mkstemp(dir=dtb_tmpdir, prefix="qcom-", suffix=".dtb")
+
+    # Insert qcom,msm-id is in the DTS
+    print "INFO: Inserting qcom,msm-id into DTB"
+    fd, dts_tmp = tempfile.mkstemp(suffix=".dts")
+    qcom_frag = "/ { qcom,msm-id = <126 8 0>, <185 8 0>, <186 8 0>; };"
+    cmd = "dtc -I dtb -O dts -o %s %s" %(dts_tmp, dtb_l)
+    subprocess.call(cmd, shell=True)
+    fp = open(dts_tmp, "a")
+    fp.write(qcom_frag)
+    fp.close()
+    cmd = "dtc -I dts -O dtb -o %s %s" %(dtb_qcom, dts_tmp)
+    subprocess.call(cmd, shell=True)
+    os.unlink(dts_tmp)
+
     fd, bootimg = tempfile.mkstemp(prefix="boot.img")
     mkbootimg_args = "--base 0x00000000 --pagesize 2048 --ramdisk_offset 0x02000000 --tags_offset 0x01e00000 "
     cmd = "/usr/local/bin/mkqcdtbootimg %s --output %s --kernel %s " %(mkbootimg_args, bootimg, kernel_l)
@@ -149,7 +178,8 @@ elif fastboot_cmd == "sony":
     if cmdline:
 	cmd += '--cmdline "%s" ' %cmdline
     if dtb_l:
-        cmd += "--dt_dir %s " %os.path.dirname(dtb_l)
+#        cmd += "--dt_dir %s " %os.path.dirname(dtb_l)
+        cmd += "--dt_dir %s " %os.path.dirname(dtb_qcom)
     print cmd
     subprocess.call(cmd, shell=True)
 
@@ -169,8 +199,12 @@ elif fastboot_cmd == "sony":
     print "INFO: Rebooting"
     tty = open("/home/khilman/dev/z1-1", "w")
     tty.write("pvabc")
+    time.sleep(0.5)
+    tty.write("P")
+    time.sleep(0.5)
+    tty.write("A")
     time.sleep(1)
-    tty.write("PA")
+    tty.write("a")
     tty.close()
 
 elif fastboot_cmd == "rockchip":
@@ -198,5 +232,5 @@ elif fastboot_cmd == "rockchip":
     subprocess.call(cmd, shell=True)
 
 
-#cleanup()
+cleanup()
 
