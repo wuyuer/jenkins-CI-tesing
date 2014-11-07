@@ -47,6 +47,7 @@ print "Running:", " ".join(sys.argv)
 
 boards = {
     'dragon': ("25001b4", "boot", "console=ttyMSM0,115200,n8 debug earlyprintk"),
+    'ifc6410': ("153952c", "boot", None),
     'capri': ("1234567890", "flash", ""),
     'n900': (None, "nolo", None),
     'z1': ("BH9006CT08", "sony", "console=ttyMSM,115200,n8 debug"),
@@ -59,16 +60,12 @@ initrd_l = ''
 bootimg = ''
 def cleanup():
     if os.path.exists(kernel_l):
-        print "Deleting", kernel_l
         os.unlink(kernel_l)
     if os.path.exists(dtb_l):
-        print "Deleting", dtb_l
         os.unlink(dtb_l)
     if os.path.exists(initrd_l):
-        print "Deleting", initrd_l
         os.unlink(initrd_l)
     if os.path.exists(bootimg):
-        print "Deleting", bootimg
         os.unlink(bootimg)
     sys.exit(0)
 
@@ -113,16 +110,32 @@ except tftpy.TftpShared.TftpException as e:
     cleanup()
 
 if fastboot_cmd == 'boot':
+    fastboot_args = ""
+
+    # qcom hackery
+    if board == "ifc6410":
+        fastboot_args = "-b 0x80200000"
+        fd, kernel_fixup = tempfile.mkstemp(prefix='kernel-fixup-')
+        cmd = "cat /home/khilman/work.local/platforms/qcom/ifc6410/fixup.bin %s > %s" %(kernel_l, kernel_fixup)
+        print "INFO:", cmd
+        subprocess.call(cmd, shell=True)
+        os.remove(kernel_l)
+        kernel_l = kernel_fixup
+
     # fastboot requires DTB appended
     cmd = "cat %s >> %s" %(dtb_l, kernel_l)
+    print "INFO:", cmd
     subprocess.call(cmd, shell=True)
 
     cmd = "fastboot -s %s " %id
+    cmd += "boot %s " %fastboot_args
     if cmdline:
         cmd += '-c "%s" ' %cmdline 
-    cmd += "boot %s %s" %(kernel_l, initrd_l)
+
+    cmd += "%s %s" %(kernel_l, initrd_l)
     print cmd
-    subprocess.call(cmd, shell=True)
+    output = subprocess.check_output(cmd, stderr=subprocess.STDOUT, shell=True)
+    print output
 
 elif fastboot_cmd == 'flash':
     cmd = 'fastboot -s %s flash kernel %s' %(id, kernel_l)
@@ -206,6 +219,8 @@ elif fastboot_cmd == "sony":
     time.sleep(1)
     tty.write("a")
     tty.close()
+
+    shutil.rmtree(dtb_tmpdir)
 
 elif fastboot_cmd == "rockchip":
     os.chdir("/home/khilman/work.local/platforms/rockchip")
