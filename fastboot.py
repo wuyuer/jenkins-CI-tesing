@@ -46,11 +46,11 @@ if len(args) > 2:
 print "Running:", " ".join(sys.argv)
 
 boards = {
-    'dragon': ("25001b4", "boot", "console=ttyMSM0,115200,n8 debug earlyprintk"),
+    'dragon': ("25001b4", "boot", None),
     'ifc6410': ("153952c", "boot", None),
     'capri': ("1234567890", "flash", ""),
     'n900': (None, "nolo", None),
-    'z1': ("BH9006CT08", "sony", "console=ttyMSM,115200,n8 debug"),
+    'z1': ("BH9006CT08", "sony", None),
     'rk3288-evb': (None, "rockchip", None),
 }
 
