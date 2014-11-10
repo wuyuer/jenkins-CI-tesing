@@ -48,6 +48,7 @@ print "Running:", " ".join(sys.argv)
 boards = {
     'dragon': ("25001b4", "boot", None),
     'ifc6410': ("153952c", "boot", None),
+    'ifc6540': ("105869a1", "boot", None),
     'capri': ("1234567890", "flash", ""),
     'n900': (None, "nolo", None),
     'z1': ("BH9006CT08", "sony", None),
@@ -113,8 +114,8 @@ if fastboot_cmd == 'boot':
     fastboot_args = ""
 
     # qcom hackery
-    if board == "ifc6410":
-        fastboot_args = "-b 0x80200000"
+    if board.startswith("ifc6"):
+        fastboot_args = "-b 0x82000000"
         fd, kernel_fixup = tempfile.mkstemp(prefix='kernel-fixup-')
         cmd = "cat /home/khilman/work.local/platforms/qcom/ifc6410/fixup.bin %s > %s" %(kernel_l, kernel_fixup)
         print "INFO:", cmd
