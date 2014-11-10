@@ -47,7 +47,7 @@ fp.close()
 
 dir = os.path.abspath(sys.argv[1])
 base = os.path.dirname(dir)
-cwd = os.getcwd()
+tree = os.path.basename(os.getcwd())
 
 builds = os.listdir(dir)
 
@@ -123,9 +123,10 @@ for board in boards.keys():
                 build_meta = json.load(fp)
                 fp.close()
 
-                git_describe = None
-                if build_meta.has_key("git_describe_v"):
-                    git_describe = build_meta["git_describe_v"]
+                git_describe = build_meta.get("git_describe", None)
+                git_commit = build_meta.get("git_commit", None)
+                git_branch = build_meta.get("git_branch", None)
+                git_url = build_meta.get("git_url", None)
                 
                 os.chdir(os.path.join(dir, build))
 
@@ -193,14 +194,27 @@ for board in boards.keys():
                         boot_json["boot_result_description"] = "Kernel build failed. Unable to boot."
                         fp = open(jsonfile, "w")
                         json.dump(boot_json, fp)
-                        fp.close()
                     else:
                         cmd = "pyboot -w -s -l %s" %(logfile)
-                        if modules:
-                            cmd += " -m %s" %modules
+#                        if modules:
+#                            cmd += " -m %s" %modules
                         cmd += " %s %s %s %s" %(console, kimage, dtb_path, initrd)
                         print "\t", d, cmd
                         subprocess.call(cmd, shell=True)
+
+                    # add a few more things to boot JSON
+                    if os.path.exists(jsonfile):
+                        fp = open(jsonfile, "r+")
+                        boot_json = json.load(fp)
+                        fp.seek(0)
+                        boot_json["defconfig"] = defconfig
+                        boot_json["git_describe"] = git_describe
+                        boot_json["git_commit"] = git_commit
+                        boot_json["git_branch"] = git_branch
+                        boot_json["git_url"] = git_url
+
+                        json.dump(boot_json, fp, indent=4, sort_keys=True)
+                        fp.close()
 
                     c += 1
 
