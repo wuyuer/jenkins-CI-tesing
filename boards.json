@@ -59,7 +59,6 @@
     }, 
 
     "exynos5410-smdk5410": {
-	"disabled": "true",
 	"console": "odroid-xu",
 	"LPAE": true,
 	"dtb": ["exynos5410-smdk5410", "exynos5410-odroidxu"],
@@ -203,6 +202,14 @@
 
     "qcom-apq8074-dragonboard": {
 	"console": "dragon",
+        "defconfig": [
+            "multi_v7_defconfig", 
+            "qcom_defconfig"
+        ]
+    }, 
+
+    "qcom-apq8064-ifc6410": {
+	"console": "ifc6410",
         "defconfig": [
             "multi_v7_defconfig", 
             "qcom_defconfig"
