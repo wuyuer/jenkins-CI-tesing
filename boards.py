@@ -190,8 +190,8 @@ for board in boards.keys():
                     build_result = build_meta.get("build_result", "UNKNOWN")
                     if build_result != "PASS":
                         print "\t%s%s: WARNING: Build failed.  Creating %s" %(board, d, jsonfile)
-                        boot_json = {"boot_result": "FAIL"}
-                        boot_json["boot_result_description"] = "Kernel build failed. Unable to boot."
+                        boot_json = {"boot_result": "UNTRIED"}
+                        boot_json["boot_result_description"] = "Kernel build failed."
                         fp = open(jsonfile, "w")
                         json.dump(boot_json, fp)
                     else:
