@@ -53,6 +53,7 @@ boards = {
     'n900': (None, "nolo", None),
     'z1': ("BH9006CT08", "sony", None),
     'rk3288-evb': (None, "rockchip", None),
+    'cm-qs600': ("f0b93ea2", "boot", None),
 }
 
 kernel_l = ''
@@ -114,7 +115,7 @@ if fastboot_cmd == 'boot':
     fastboot_args = ""
 
     # qcom hackery
-    if board.startswith("ifc6"):
+    if board.startswith("ifc6") or board.startswith("cm-qs"):
         fastboot_args = "-b 0x82000000"
         fd, kernel_fixup = tempfile.mkstemp(prefix='kernel-fixup-')
         cmd = "cat /home/khilman/work.local/platforms/qcom/ifc6410/fixup.bin %s > %s" %(kernel_l, kernel_fixup)
