@@ -4,6 +4,7 @@ import os, sys, subprocess, glob
 import tempfile, getopt
 import util
 import json
+import time
 
 maillog = None
 mail_to = None
@@ -40,12 +41,14 @@ builds = {}
 total_fail_count = 0
 total_pass_count = 0
 total_offline_count = 0
+total_untried_count = 0
 total_board_count = 0
 for build in os.listdir(dir):
     boards = {}
     build_fail_count = 0
     build_pass_count = 0
     build_offline_count = 0
+    build_untried_count = 0
     path = os.path.join(dir, build)
     for jsonfile in glob.glob('%s/boot-*.json' %path):
         (prefix, suffix) = os.path.splitext(jsonfile) 
@@ -55,6 +58,9 @@ for build in os.listdir(dir):
         boot_meta = json.load(fp)
         fp.close()
         result = boot_meta.get("boot_result", "UNKNOWN")
+        result_desc = boot_meta.get("boot_result_description", None)
+        if result_desc and result_desc.startswith("Kernel build failed"):
+            result = 'UNTRIED'
 
         total_board_count += 1
         if result == 'PASS':
@@ -63,17 +69,20 @@ for build in os.listdir(dir):
         elif result == 'OFFLINE':
             build_offline_count += 1
             total_offline_count += 1
+        elif result == 'UNTRIED':
+            build_untried_count += 1
+            total_untried_count += 1
         else:
             build_fail_count += 1
             total_fail_count += 1
 
         warnings = boot_meta.get("boot_warnings", 0)
-        time = boot_meta.get("boot_time", 0)
+        boot_time = boot_meta.get("boot_time", 0)
         result_desc = boot_meta.get("boot_result_description", None)
-        boards[board] = (result, time, warnings, result_desc)
+        boards[board] = (result, boot_time, warnings, result_desc)
 
     if len(boards) > 0:
-        builds[build] = (boards, build_fail_count, build_pass_count, build_offline_count)
+        builds[build] = (boards, build_fail_count, build_pass_count, build_offline_count, build_untried_count)
 
 # Don't send mail if there were no builds
 if len(builds) == 0:
@@ -92,6 +101,10 @@ offline_summary = ""
 if total_offline_count:
     offline_summary = ", %d offline" %total_offline_count
 
+untried_summary = ""
+if total_untried_count:
+    untried_summary = ", %d untried" %total_untried_count
+
 # Unbuffer stdout so 'print' and subprocess output intermingle correctly
 sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)
 
@@ -105,7 +118,7 @@ tmplog = tempfile.mktemp(suffix='.log', prefix='boot-report')
 #if maillog:
 if tmplog:
     stdout_save = sys.stdout
-    tee = subprocess.Popen(["tee", "%s" %tmplog], stdin=subprocess.PIPE)
+    tee = subprocess.Popen(["tee", "%s" %tmplog], stdin=subprocess.PIPE, bufsize=0)
     os.dup2(tee.stdin.fileno(), sys.stdout.fileno())
     os.dup2(tee.stdin.fileno(), sys.stderr.fileno())
 
@@ -135,13 +148,10 @@ if total_fail_count:
             result = report[0]
             result_desc = report[3]
             if result == 'FAIL':
-                print '%28s: %8s:    %s' %(board, result, build)
+                print '%32s: %8s:    %s' %(board, result, build)
                 if result_desc:
-                    print ' ' * 33, result_desc
-                if result_desc and result_desc.startswith("Kernel build failed"):
-                    print ' ' * 27, "      %s/%s/build.log" %(url_base, build)
-                else:
-                    print ' ' * 27, "      %s/%s/boot-%s.html" %(url_base, build, board)
+                    print ' ' * 38, result_desc
+                print ' ' * 37, "%s/%s/boot-%s.html" %(url_base, build, board)
                 
     print
 
@@ -159,7 +169,31 @@ if total_offline_count:
             report = boards[board]
             result = report[0]
             if result == 'OFFLINE':
-                print '%28s: %8s:    %s' %(board, result, build)
+                print '%32s: %8s:    %s' %(board, result, build)
+    print
+
+# Untried summary
+if total_untried_count:
+    msg =  "Untried boards (e.g. due to kernel build fail, missing DTB, etc.)"
+    print msg
+    print '=' * len(msg)
+    for build in builds:
+        boards = builds[build][0]
+        untried_count = builds[build][4]
+        if not untried_count:
+            continue
+        for board in boards:
+            report = boards[board]
+            result = report[0]
+            result_desc = report[3]
+            if result == 'UNTRIED':
+                print '%32s: %8s:    %s' %(board, result, build)
+                if result_desc:
+                    print ' ' * 34, result_desc
+                if result_desc and result_desc.startswith("Kernel build failed"):
+                    print ' ' * 34, "%s/%s/build.log" %(url_base, build)
+                else:
+                    print ' ' * 34, "%s/%s/boot-%s.html" %(url_base, build, board)
     print
 
 # Passing Summary
@@ -175,17 +209,15 @@ if total_pass_count:
         for board in boards:
             report = boards[board]
             result = report[0]
-            time = report[1]
+            boot_time = report[1]
             warnings = report[2]
             result_desc = report[3]
-            print "%28s     %d min %4.1f sec: %8s" \
-                %(board, time / 60, time % 60, result, ),
+            print "%32s: %8s" %(board,result),
             if warnings:
-                print " (Warnings: %d)" %warnings
-            elif result_desc:
-                print " -", result_desc
-            else:
-                print
+                print " (Warnings: %2d)" %warnings,
+            if result_desc:
+                print " - ", result_desc,
+            print
 
 sys.stdout.flush()
 sys.stdout = stdout_save
@@ -194,11 +226,18 @@ sys.stdout = stdout_save
 if total_pass_count == 0 and mail_to:
     mail_to = "khilman@linaro.org"
 
+subject_prefix = ""
+if mail_to:
+    if not os.path.exists(tmplog) or os.path.getsize(tmplog) == 0:
+        print "WARN: tmplog doesn't exist, or size = 0"
+        mail_to = "khilman@kernel.org"
+        subject_prefix = "OOPS: "
+
 mail_headers = """From: Kevin's boot bot <khilman@kernel.org>
 To: %s
-Subject: %s boot: %d boots: %d pass, %d fail%s (%s)
+Subject: %s%s boot: %d boots: %d pass, %d fail%s%s (%s)
 
-""" %(mail_to, tree_branch, total_board_count, total_pass_count, total_fail_count, offline_summary, describe)
+""" %(mail_to, subject_prefix, tree_branch, total_board_count, total_pass_count, total_fail_count, offline_summary, untried_summary, describe)
 
 # Create the final report with mail headers
 if maillog:
@@ -207,7 +246,8 @@ if maillog:
     fp.write(mail_headers)
     fp.close()
 
-    subprocess.call("cat %s >> %s" %(tmplog, maillog), shell=True)
+    subprocess.call("cat %s >> %s; sync" %(tmplog, maillog), shell=True)
+    time.sleep(1)
     mail_cmd = 'cat %s | msmtp --read-envelope-from -t --' %(maillog)
     if mail_to:
         subprocess.check_output(mail_cmd, shell=True)
