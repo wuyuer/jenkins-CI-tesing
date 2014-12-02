@@ -100,6 +100,8 @@ for board in boards.keys():
     if b.has_key("console"):
         console = b["console"]
 
+    modules = b.get("modules", "modules.tar.xz")
+
     # add extra defconfigs based on flags
     if b.has_key("defconfig"):
         defconfig_list = list(b["defconfig"])  # make a copy before appending
@@ -140,8 +142,7 @@ for board in boards.keys():
                     if arch == "arm64":
                         initrd = initrd_arm64
 
-                modules = "modules.tar.xz"
-                if not os.path.exists(modules):
+                if modules and not os.path.exists(modules):
                     modules = None
 
                 for dtb in dtbs:
@@ -196,8 +197,8 @@ for board in boards.keys():
                         json.dump(boot_json, fp)
                     else:
                         cmd = "pyboot -w -s -l %s" %(logfile)
-#                        if modules:
-#                            cmd += " -m %s" %modules
+                        if modules:
+                            cmd += " -m %s" %modules
                         cmd += " %s %s %s %s" %(console, kimage, dtb_path, initrd)
                         print "\t", d, cmd
                         subprocess.call(cmd, shell=True)
