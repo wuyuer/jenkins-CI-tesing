@@ -151,6 +151,7 @@
     "omap3-n900": {
 	"console": "n900",
 	"legacy": true,
+	"modules": false,
         "defconfig": [
             "multi_v7_defconfig", 
             "omap2plus_defconfig"
