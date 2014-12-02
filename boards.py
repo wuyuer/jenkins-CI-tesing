@@ -178,7 +178,7 @@ for board in boards.keys():
                     a += 1
                     total_count += 1
                     logbase = "boot-%s" %logname
-                    logfile = logbase + ".log"
+                    logfile = logbase + ".txt"
                     jsonfile = logbase + ".json"
                     if os.path.exists(jsonfile):
                         fp = open(jsonfile)
