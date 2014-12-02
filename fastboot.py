@@ -232,16 +232,16 @@ elif fastboot_cmd == "rockchip":
     subprocess.call(cmd, shell=True)
 
     # erase kernel at beginning of eMMC
-    cmd = "./bin/rkflashtool w 0x0 0x8000 < /dev/zero"
+    cmd = "./bin/rkflashtool w 0x0 0x8000 < /dev/zero > /dev/null"
     subprocess.call(cmd, shell=True)
 
     # write kernel to beginning of eMMC
-    cmd = "./bin/rkflashtool w 0x0 0x8000 < %s" %kernel_l
+    cmd = "./bin/rkflashtool w 0x0 0x8000 < %s > /dev/null" %kernel_l
     subprocess.call(cmd, shell=True)
 
     # write initrd to eMMC
     if initrd_l:
-        cmd = "./bin/rkflashtool w 0x10000 0x8000 < %s" %initrd_l
+        cmd = "./bin/rkflashtool w 0x10000 0x8000 < %s > /dev/null" %initrd_l
         subprocess.call(cmd, shell=True)
 
     # reboot (default u-boot env set to boot kernel from MMC)
