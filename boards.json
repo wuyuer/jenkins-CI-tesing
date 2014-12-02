@@ -264,6 +264,15 @@
         ]
     }, 
 
+    "sun7i-a20-bananapi": {
+	"console": "bananapi",
+	"LPAE": true,
+        "defconfig": [
+            "sunxi_defconfig", 
+            "multi_v7_defconfig"
+        ]
+    }, 
+
     "tegra124-jetson-tk1": {
 	"console": "jetson",
 	"LPAE": true,
