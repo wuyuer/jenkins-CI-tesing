@@ -11,6 +11,7 @@ mail_to = None
 url_base = "http://storage.armcloud.us/kernel-ci"
 boot_url_base = "http://status.armcloud.us/boot/all/job"
 build_url_base = "http://status.armcloud.us/build"
+lab = "lab-khilman"
 
 def usage():
     print "Usage: %s [-m <email address>] <base>" %(sys.argv[0])
@@ -50,7 +51,7 @@ for build in os.listdir(dir):
     build_offline_count = 0
     build_untried_count = 0
     path = os.path.join(dir, build)
-    for jsonfile in glob.glob('%s/boot-*.json' %path):
+    for jsonfile in glob.glob('%s/%s/boot-*.json' %(path, lab)):
         (prefix, suffix) = os.path.splitext(jsonfile) 
         board = os.path.basename(prefix)[5:] # drop 'boot-'
 

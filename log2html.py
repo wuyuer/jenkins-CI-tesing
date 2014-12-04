@@ -48,7 +48,15 @@ html_f = open(html, "w")
 json_f = open(jsn, "r+")
 boot_json = json.load(json_f)
 json_f.seek(0)
-boot_json["boot_log_html"] = os.path.basename(html)
+
+boot_log = boot_json.get("boot_log", log)
+
+# HACK: remove the lab ID prefix for the new/staging backend
+#boot_log = os.path.basename(boot_log)
+
+boot_log_base,ext = os.path.splitext(boot_log)
+boot_json["boot_log_html"] = boot_log_base + ".html"
+
 json.dump(boot_json, json_f, indent=4, sort_keys=True)
 json_f.close()
 

@@ -14,6 +14,7 @@ cfg_dir = "/home/khilman/work/kernel/tools/build-scripts"
 initrd_armel = "/opt/kjh/rootfs/buildroot/arm/rootfs.cpio.gz"
 initrd_armeb = "/opt/kjh/rootfs/buildroot/armeb/rootfs.cpio.gz"
 initrd_arm64 = "/opt/kjh/rootfs/buildroot/arm64/rootfs.cpio.gz"
+lab = "lab-khilman"
 
 initrd = None
 
@@ -131,6 +132,8 @@ for board in boards.keys():
                 git_url = build_meta.get("git_url", None)
                 
                 os.chdir(os.path.join(dir, build))
+                if not os.path.exists(lab):
+                    os.mkdir(lab)
 
                 kimage = "zImage"
                 if arch == "arm64":
@@ -178,6 +181,8 @@ for board in boards.keys():
                     a += 1
                     total_count += 1
                     logbase = "boot-%s" %logname
+                    logbase = os.path.join(lab, logbase)
+
                     logfile = logbase + ".txt"
                     jsonfile = logbase + ".json"
                     if os.path.exists(jsonfile):
@@ -209,10 +214,13 @@ for board in boards.keys():
                         boot_json = json.load(fp)
                         fp.seek(0)
                         boot_json["defconfig"] = defconfig
-                        boot_json["git_describe"] = git_describe
-                        boot_json["git_commit"] = git_commit
-                        boot_json["git_branch"] = git_branch
-                        boot_json["git_url"] = git_url
+
+                        boot_json["arch"] = arch
+                        boot_json["version"] = "1.0"
+                        boot_json["board"] = board
+                        boot_json["lab_name"] = lab
+                        boot_json["kernel"] = git_describe
+                        boot_json["job"] = tree
 
                         json.dump(boot_json, fp, indent=4, sort_keys=True)
                         fp.close()
