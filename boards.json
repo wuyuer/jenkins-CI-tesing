@@ -71,7 +71,8 @@
     "exynos5422-odroid-xu3": {
 	"console": "odroid-xu3",
 	"LPAE": true,
-	"dtb": "exynos5420-smdk5420",
+	"dtb": ["exynos5420-smdk5420", "exynos5422-odroidxu3"],
+	"modules": false,
         "defconfig": [
             "exynos_defconfig", 
             "multi_v7_defconfig"
@@ -81,6 +82,7 @@
     "exynos5420-arndale-octa": {
 	"LPAE": true,
 	"console": "octa",
+	"modules": false,
         "defconfig": [
             "exynos_defconfig", 
             "multi_v7_defconfig"
@@ -306,6 +308,7 @@
 
     "versatilepb": {
 	"legacy": true,
+	"modules": false,
 	"defconfig": [
 	    "versatile_defconfig"
 	]
