@@ -152,7 +152,7 @@ if total_fail_count:
                 print '%32s: %8s:    %s' %(board, result, build)
                 if result_desc:
                     print ' ' * 38, result_desc
-                print ' ' * 37, "%s/%s/boot-%s.html" %(url_base, build, board)
+                print ' ' * 37, "%s/%s/%s/boot-%s.html" %(url_base, build, lab, board)
                 
     print
 
