@@ -11,6 +11,7 @@ import subprocess
 import getopt
 import tempfile
 import glob
+import fnmatch
 import shutil
 import re
 import stat
@@ -306,15 +307,22 @@ if install:
     if kimage_file:
         shutil.copy(kimage_file, install_path)
 
-    dtbs = glob.glob("%s/dts/*.dtb" %boot_dir)
-    if len(dtbs):
-        dtb_dest = os.path.join(install_path, 'dtbs')
-        if not os.path.exists(dtb_dest):
-            os.makedirs(dtb_dest)
-        for dtb in dtbs:
-            shutil.copy(dtb, dtb_dest)
-    else:
-        dtb_dest = None
+    dtb_dest = None
+    for root, dirnames, filenames in os.walk(os.path.join(boot_dir, 'dts')):
+        for filename in fnmatch.filter(filenames, '*.dtb'):
+            # Found a dtb
+            dtb = os.path.join(root, filename)
+            dtb_dest = os.path.join(install_path, 'dtbs')
+            # Check if the dtb exists in a subdirectory
+            if root.split(os.path.sep)[-1] != 'dts':
+                dest = os.path.join(install_path, 'dtbs',
+                                        root.split(os.path.sep)[-1])
+            else:
+                dest = os.path.join(install_path, 'dtbs')
+            if not os.path.exists(dest):
+                os.makedirs(dest)
+            # Copy the dtb
+            shutil.copy(dtb, dest)
 
     #do_make('install')
     if modules:
