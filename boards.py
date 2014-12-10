@@ -217,7 +217,7 @@ for board in boards.keys():
 
                         boot_json["arch"] = arch
                         boot_json["version"] = "1.0"
-                        boot_json["board"] = board
+                        boot_json["board"] = logname # includes ",legacy" 
                         boot_json["lab_name"] = lab
                         boot_json["kernel"] = git_describe
                         boot_json["job"] = tree
