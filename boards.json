@@ -315,7 +315,6 @@
     },
 
     "vexpress-v2p-ca9": {
-	"legacy": true,
 	"defconfig": [
 	    "vexpress_defconfig",
 	    "multi_v7_defconfig",
