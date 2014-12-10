@@ -292,20 +292,29 @@ if install:
     if kconfig_frag:
         shutil.copy(kconfig_frag, install_path)
 
+    # Patterns for matching kernel images by architecture
+    if arch == 'arm':
+        patterns = ['zImage', 'vmlinux']
+    elif arch == 'arm64':
+        patterns = ['Image']
+    # TODO: Fix this assumption. ARCH != ARM* == x86
+    else:
+        patterns = ['bzImage']
+
     kimage_file = None
-    kimages = glob.glob("%s/*Image" %boot_dir)
+    kimages = []
+    for pattern in patterns:
+        for root, dirnames, filenames in os.walk(boot_dir):
+            for filename in fnmatch.filter(filenames, pattern):
+                kimages.append(os.path.join(root, filename))
+                shutil.copy(os.path.join(root, filename), install_path)
+
     if len(kimages) == 1:
         kimage_file = kimages[0]
     elif len(kimages) > 1:
-        kimage_file = kimages[-1]
         for kimage in kimages:
             if os.path.basename(kimage).startswith('z'):
                 kimage_file = kimage
-        print "FIXME: need deal with multiple kernel images.  Picking %s from %s" \
-            %(kimage_file, kimages)
-
-    if kimage_file:
-        shutil.copy(kimage_file, install_path)
 
     dtb_dest = None
     for root, dirnames, filenames in os.walk(os.path.join(boot_dir, 'dts')):
