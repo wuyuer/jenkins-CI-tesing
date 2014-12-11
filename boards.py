@@ -18,6 +18,9 @@ lab = "lab-khilman"
 
 initrd = None
 
+subprocs = []
+max_subprocs = 10
+
 def usage():
     print "Usage: %s <build dir>"
 
@@ -102,6 +105,7 @@ for board in boards.keys():
         console = b["console"]
 
     modules = b.get("modules", "modules.tar.xz")
+    modules = None
 
     # add extra defconfigs based on flags
     if b.has_key("defconfig"):
@@ -201,12 +205,19 @@ for board in boards.keys():
                         fp = open(jsonfile, "w")
                         json.dump(boot_json, fp)
                     else:
-                        cmd = "pyboot -b %s -w -s -n %s -L %s -l %s" %(build_json, logname, lab, logfile)
+                        cmd = "pyboot -q -b %s -w -s -n %s -L %s -l %s" %(build_json, logname, lab, logfile)
                         if modules:
                             cmd += " -m %s" %modules
                         cmd += " %s %s %s %s" %(console, kimage, dtb_path, initrd)
                         print "\t", d, cmd
-                        subprocess.call(cmd, shell=True)
+                        #subprocess.call(cmd, shell=True)
+                        s = subprocess.Popen(cmd, shell=True)
+                        subprocs.append(s)
+
+                        # Limit how many jobs an run in parallel
+                        if len(subprocs) >= max_subprocs:
+                            s = subprocs.pop(0)
+                            s.wait()
 
                     c += 1
 
@@ -217,5 +228,10 @@ for board in boards.keys():
 
 print "-------\n%d / %d Boots." %(boot_count, total_count)
 print board_count, "Boards."
+
+# Wait for any remaining jobs to finish
+while len(subprocs):
+    s = subprocs.pop(0)
+    s.wait()
 
 
