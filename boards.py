@@ -118,7 +118,8 @@ for board in boards.keys():
         for defconfig in b["defconfig"]:
             d = "%s-%s" %(arch, defconfig)
             for build in builds:
-                build_json = os.path.join(dir, d, "build.json")
+                os.chdir(os.path.join(dir, build))
+                build_json = os.path.join("build.json")
                 if build != d:
                     continue;
 
@@ -131,7 +132,6 @@ for board in boards.keys():
                 git_branch = build_meta.get("git_branch", None)
                 git_url = build_meta.get("git_url", None)
                 
-                os.chdir(os.path.join(dir, build))
                 if not os.path.exists(lab):
                     os.mkdir(lab)
 
@@ -192,7 +192,7 @@ for board in boards.keys():
                         if boot_json["boot_result"] == "PASS":
                             print "\t%s/%s: Boot JSON reports PASS.  Skipping." %(board, d)
                             continue
-                    
+
                     build_result = build_meta.get("build_result", "UNKNOWN")
                     if build_result != "PASS":
                         print "\t%s%s: WARNING: Build failed.  Creating %s" %(board, d, jsonfile)
@@ -201,29 +201,12 @@ for board in boards.keys():
                         fp = open(jsonfile, "w")
                         json.dump(boot_json, fp)
                     else:
-                        cmd = "pyboot -w -s -l %s" %(logfile)
+                        cmd = "pyboot -b %s -w -s -n %s -L %s -l %s" %(build_json, logname, lab, logfile)
                         if modules:
                             cmd += " -m %s" %modules
                         cmd += " %s %s %s %s" %(console, kimage, dtb_path, initrd)
                         print "\t", d, cmd
                         subprocess.call(cmd, shell=True)
-
-                    # add a few more things to boot JSON
-                    if os.path.exists(jsonfile):
-                        fp = open(jsonfile, "r+")
-                        boot_json = json.load(fp)
-                        fp.seek(0)
-                        boot_json["defconfig"] = defconfig
-
-                        boot_json["arch"] = arch
-                        boot_json["version"] = "1.0"
-                        boot_json["board"] = logname # includes ",legacy" 
-                        boot_json["lab_name"] = lab
-                        boot_json["kernel"] = git_describe
-                        boot_json["job"] = tree
-
-                        json.dump(boot_json, fp, indent=4, sort_keys=True)
-                        fp.close()
 
                     c += 1
 
