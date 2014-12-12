@@ -394,6 +394,8 @@ if install:
     bmeta["build_errors"] = num_errors
     bmeta["build_warnings"] = num_warnings
     bmeta["build_platform"] = platform.uname()
+    if os.environ.has_key("TREE_NAME"):
+        bmeta["job"] = os.environ["TREE_NAME"]
 
     # Create JSON format build metadata
     build_json = os.path.join(install_path, 'build.json')
