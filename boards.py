@@ -21,7 +21,7 @@ lab = "lab-khilman"
 initrd = None
 
 subprocs = []
-max_subprocs = 10
+max_subprocs = 20
 
 def usage():
     print "Usage: %s <build dir>"
@@ -125,10 +125,11 @@ for board in boards.keys():
         for defconfig in b["defconfig"]:
             d = "%s-%s" %(arch, defconfig)
             for build in builds:
-                os.chdir(os.path.join(dir, build))
-                build_json = os.path.join("build.json")
                 if build != d:
                     continue;
+
+                os.chdir(os.path.join(dir, build))
+                build_json = os.path.join("build.json")
 
                 fp = open(build_json, "r")
                 build_meta = json.load(fp)
