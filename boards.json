@@ -249,6 +249,13 @@
         ]
     }, 
 
+    "stih410-b2120": {
+	"console": "st-b2120",
+        "defconfig": [
+            "multi_v7_defconfig"
+        ]
+    }, 
+
     "sun4i-a10-cubieboard": {
 	"console": "cubie",
         "defconfig": [
@@ -363,6 +370,14 @@
             "multi_v7_defconfig", 
             "qcom_defconfig"
         ]
-   }
+   },
+
+   "bcm2835-rpi": {
+       "console": "rpi",
+       "dtb": "bcm2835-rpi-b",
+       "defconfig": [
+           "bcm2835_defconfig"
+       ]
+    }
 }
 
