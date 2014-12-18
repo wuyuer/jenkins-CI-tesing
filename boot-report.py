@@ -110,19 +110,14 @@ if total_untried_count:
 sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)
 
 #
-#  Log to a file as well as stdout (for sending with msmtp)
+#  Log to a file (for sending with msmtp)
 #
-tmplog = tempfile.mktemp(suffix='.log', prefix='boot-report')
-#if not maillog:
-#    maillog = tempfile.mktemp(suffix='.log', prefix='boot-report-mail')
-
-#if maillog:
-if tmplog:
+tmplog = None
+if maillog:
+    tmplog_fd, tmplog = tempfile.mkstemp(suffix='.log', prefix='boot-report')
     stdout_save = sys.stdout
-    tee = subprocess.Popen(["tee", "%s" %tmplog], stdin=subprocess.PIPE, bufsize=0)
-    os.dup2(tee.stdin.fileno(), sys.stdout.fileno())
-    os.dup2(tee.stdin.fileno(), sys.stderr.fileno())
-
+    sys.stdout = os.fdopen(tmplog_fd, "w")
+    
 print "Full Build report:", build_url
 print "Full Boot report: ", boot_url
 print
@@ -151,7 +146,7 @@ if total_fail_count:
             if result == 'FAIL':
                 print '%32s: %8s:    %s' %(board, result, build)
                 if result_desc:
-                    print ' ' * 38, result_desc
+                    print ' ' * 37, result_desc
                 print ' ' * 37, "%s/%s/%s/boot-%s.html" %(url_base, build, lab, board)
                 
     print
@@ -220,19 +215,20 @@ if total_pass_count:
                 print " - ", result_desc,
             print
 
-sys.stdout.flush()
-sys.stdout = stdout_save
+if tmplog:
+    sys.stdout.close()
+    sys.stdout = stdout_save
 
 # if no passing tests, only send mail to me
 if total_pass_count == 0 and mail_to:
     mail_to = "khilman@linaro.org"
 
 subject_prefix = ""
-if mail_to:
-    if not os.path.exists(tmplog) or os.path.getsize(tmplog) == 0:
-        print "WARN: tmplog doesn't exist, or size = 0"
-        mail_to = "khilman@kernel.org"
-        subject_prefix = "OOPS: "
+if tmplog and (not os.path.exists(tmplog) or os.path.getsize(tmplog) == 0):
+    print "WARN: tmplog doesn't exist, or size = 0"
+    mail_to = "khilman@kernel.org"
+    mail_to = None
+    subject_prefix = "OOPS: "
 
 mail_headers = """From: Kevin's boot bot <khilman@kernel.org>
 To: %s
@@ -255,9 +251,8 @@ if maillog:
 
 if tmplog and os.path.exists(tmplog):
     os.remove(tmplog)
+
 if maillog:
     if os.path.exists(maillog):
         if maillog.startswith('/tmp'):
             os.remove(maillog)
-    else:
-        print "WARNING: mail log %s doesn't exist!" %maillog
