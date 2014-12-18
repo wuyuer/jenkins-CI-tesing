@@ -359,6 +359,11 @@ if install:
     bmeta["git_describe_v"] =  "%s" %git_describe_v
     bmeta["git_commit"] = "%s" %git_commit
     bmeta["defconfig"] = "%s" %defconfig
+    if len(frag_names):
+        defconfig_full = defconfig
+        defconfig_full += '+' + '+'.join(frag_names)
+        bmeta["defconfig_full"] = defconfig_full
+
     if kconfig_frag:
         bmeta["kconfig_fragments"] = "%s" %os.path.basename(kconfig_frag)
     else:
