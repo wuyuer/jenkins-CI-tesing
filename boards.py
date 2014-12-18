@@ -128,7 +128,8 @@ for board in boards.keys():
                 if build != d:
                     continue;
 
-                os.chdir(os.path.join(dir, build))
+                run_dir = os.path.join(dir, build)
+                os.chdir(run_dir)
                 build_json = os.path.join("build.json")
 
                 fp = open(build_json, "r")
