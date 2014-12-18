@@ -1,5 +1,6 @@
 {
     "am335x-bone": {
+	"mach": "omap2",
 	"console": "am335xbone",
         "defconfig": [
             "multi_v7_defconfig", 
@@ -8,6 +9,7 @@
     }, 
 
     "am335x-boneblack": {
+	"mach": "omap2",
 	"console": "am335xboneb",
         "defconfig": [
             "multi_v7_defconfig", 
@@ -15,7 +17,95 @@
         ]
     }, 
 
+    "omap3-beagle": {
+	"mach": "omap2",
+	"console": "3530beagle",
+	"legacy": true,
+        "defconfig": [
+            "multi_v7_defconfig", 
+            "omap2plus_defconfig"
+        ]
+    }, 
+
+    "omap3-beagle-xm": {
+	"mach": "omap2",
+	"legacy": true,
+	"console": "3730xm",
+        "defconfig": [
+            "multi_v7_defconfig", 
+            "omap2plus_defconfig"
+        ]
+    }, 
+
+    "omap3-n900": {
+	"mach": "omap2",
+	"console": "n900",
+	"legacy": true,
+	"modules": false,
+        "defconfig": [
+            "multi_v7_defconfig", 
+            "omap2plus_defconfig"
+        ]
+    }, 
+
+    "omap3-overo-storm-tobi": {
+	"mach": "omap2",
+	"console": "3730storm",
+	"legacy": true,
+        "defconfig": [
+            "multi_v7_defconfig", 
+            "omap2plus_defconfig"
+        ]
+    }, 
+
+    "omap3-overo-tobi": {
+	"mach": "omap2",
+	"console": "3530overo",
+	"legacy": true,
+        "defconfig": [
+            "multi_v7_defconfig", 
+            "omap2plus_defconfig"
+        ]
+    }, 
+
+    "omap4-panda": {
+	"mach": "omap2",
+	"console": "4430panda",
+        "defconfig": [
+            "multi_v7_defconfig", 
+            "omap2plus_defconfig"
+        ]
+    }, 
+
+    "omap4-panda-es": {
+	"mach": "omap2",
+	"console": "4460panda-es",
+        "defconfig": [
+            "multi_v7_defconfig", 
+            "omap2plus_defconfig"
+        ]
+    }, 
+
+    "omap5-uevm": {
+	"mach": "omap2",
+	"console": "omap5uevm",
+	"LPAE": true,
+        "defconfig": [
+            "multi_v7_defconfig", 
+            "omap2plus_defconfig"
+        ]
+    }, 
+
+    "am437x-gp-evm": {
+	"console": "am43xevm",
+        "defconfig": [
+            "multi_v7_defconfig", 
+            "omap2plus_defconfig"
+        ]
+    },
+
     "armada-370-mirabox": {
+	"mach": "mvebu",
 	"console": "mirabox",
 	"endian": "both",
         "defconfig": [
@@ -25,6 +115,7 @@
     }, 
 
     "armada-xp-openblocks-ax3-4": {
+	"mach": "mvebu",
 	"console": "obsax3",
 	"endian": "both",
 	"LPAE": true,
@@ -35,6 +126,7 @@
     }, 
 
     "bcm28155-ap": {
+	"mach": "bcm",
 	"console": "capri",
         "defconfig": [
             "bcm_defconfig", 
@@ -42,7 +134,26 @@
         ]
     }, 
 
+   "bcm2835-rpi": {
+       "mach": "bcm",
+       "console": "rpi",
+       "dtb": "bcm2835-rpi-b",
+       "defconfig": [
+           "bcm2835_defconfig"
+       ]
+    },
+
+    "dm365evm": {
+	"mach": "davinci",
+	"legacy": true,
+	"dtb": false,
+        "defconfig": [
+            "davinci_all_defconfig"
+        ]
+    }, 
+
     "da850-evm": {
+	"mach": "davinci",
 	"console": "da850evm",
         "defconfig": [
             "davinci_all_defconfig"
@@ -50,6 +161,7 @@
     }, 
 
     "exynos5250-arndale": {
+	"mach": "exynos",
 	"LPAE": true,
 	"console": "arndale",
         "defconfig": [
@@ -59,6 +171,7 @@
     }, 
 
     "exynos5410-odroid-xu": {
+	"mach": "exynos",
 	"console": "odroid-xu",
 	"LPAE": true,
 	"dtb": ["exynos5410-smdk5410", "exynos5410-odroidxu"],
@@ -69,6 +182,7 @@
     }, 
 
     "exynos5422-odroid-xu3": {
+	"mach": "exynos",
 	"console": "odroid-xu3",
 	"LPAE": true,
 	"dtb": ["exynos5420-smdk5420", "exynos5422-odroidxu3"],
@@ -80,6 +194,7 @@
     }, 
 
     "exynos5420-arndale-octa": {
+	"mach": "exynos",
 	"LPAE": true,
 	"console": "octa",
 	"modules": false,
@@ -90,6 +205,7 @@
     }, 
 
     "exynos5800-peach-pi": {
+	"mach": "exynos",
 	"LPAE": true,
 	"console": "chromebook2",
         "defconfig": [
@@ -99,6 +215,7 @@
     }, 
 
     "imx6dl-wandboard,wand-dual": {
+	"mach": "imx",
 	"console": "wand-dual",
 	"dtb": "imx6dl-wandboard",
         "defconfig": [
@@ -108,6 +225,7 @@
     }, 
 
     "imx6dl-wandboard,wand-solo": {
+	"mach": "imx",
 	"console": "wand-solo",
 	"dtb": "imx6dl-wandboard",
         "defconfig": [
@@ -117,6 +235,7 @@
     }, 
 
     "imx6q-wandboard": {
+	"mach": "imx",
 	"console": "wand-quad",
         "defconfig": [
             "multi_v7_defconfig", 
@@ -124,86 +243,8 @@
         ]
     }, 
 
-    "dm365evm": {
-	"legacy": true,
-	"dtb": false,
-        "defconfig": [
-            "davinci_all_defconfig"
-        ]
-    }, 
-
-    "omap3-beagle": {
-	"console": "3530beagle",
-	"legacy": true,
-        "defconfig": [
-            "multi_v7_defconfig", 
-            "omap2plus_defconfig"
-        ]
-    }, 
-
-    "omap3-beagle-xm": {
-	"legacy": true,
-	"console": "3730xm",
-        "defconfig": [
-            "multi_v7_defconfig", 
-            "omap2plus_defconfig"
-        ]
-    }, 
-
-    "omap3-n900": {
-	"console": "n900",
-	"legacy": true,
-	"modules": false,
-        "defconfig": [
-            "multi_v7_defconfig", 
-            "omap2plus_defconfig"
-        ]
-    }, 
-
-    "omap3-overo-storm-tobi": {
-	"console": "3730storm",
-	"legacy": true,
-        "defconfig": [
-            "multi_v7_defconfig", 
-            "omap2plus_defconfig"
-        ]
-    }, 
-
-    "omap3-overo-tobi": {
-	"console": "3530overo",
-	"legacy": true,
-        "defconfig": [
-            "multi_v7_defconfig", 
-            "omap2plus_defconfig"
-        ]
-    }, 
-
-    "omap4-panda": {
-	"console": "4430panda",
-        "defconfig": [
-            "multi_v7_defconfig", 
-            "omap2plus_defconfig"
-        ]
-    }, 
-
-    "omap4-panda-es": {
-	"console": "4460panda-es",
-        "defconfig": [
-            "multi_v7_defconfig", 
-            "omap2plus_defconfig"
-        ]
-    }, 
-
-    "omap5-uevm": {
-	"console": "omap5uevm",
-	"LPAE": true,
-        "defconfig": [
-            "multi_v7_defconfig", 
-            "omap2plus_defconfig"
-        ]
-    }, 
-
     "qcom-apq8074-dragonboard": {
+	"mach": "qcom",
 	"console": "dragon",
         "defconfig": [
             "multi_v7_defconfig", 
@@ -212,6 +253,7 @@
     }, 
 
     "qcom-apq8064-ifc6410": {
+	"mach": "qcom",
 	"console": "ifc6410",
         "defconfig": [
             "multi_v7_defconfig", 
@@ -220,6 +262,7 @@
     }, 
 
     "qcom-apq8064-cm-qs600": {
+	"mach": "qcom",
 	"console": "cm-qs600",
         "defconfig": [
             "multi_v7_defconfig", 
@@ -227,7 +270,17 @@
         ]
     }, 
 
+    "qcom-msm8974-sony-xperia-honami": {
+	"mach": "qcom",
+	"console": "z1",
+        "defconfig": [
+            "multi_v7_defconfig", 
+            "qcom_defconfig"
+        ]
+    },
+
     "sama5d35ek": {
+	"mach": "at91",
 	"console": "sama5",
         "defconfig": [
             "sama5_defconfig"
@@ -235,6 +288,7 @@
     }, 
 
     "at91-sama5d3_xplained": {
+	"mach": "at91",
 	"console": "xplained",
 	"defconfig": [
             "sama5_defconfig"
@@ -242,6 +296,7 @@
     },
 
     "ste-snowball": {
+	"mach": "u8500",
 	"console": "snowball",
         "defconfig": [
             "multi_v7_defconfig", 
@@ -250,6 +305,7 @@
     }, 
 
     "stih410-b2120": {
+	"mach": "sti",
 	"console": "st-b2120",
         "defconfig": [
             "multi_v7_defconfig"
@@ -257,6 +313,7 @@
     }, 
 
     "sun4i-a10-cubieboard": {
+	"mach": "sunxi",
 	"console": "cubie",
         "defconfig": [
             "sunxi_defconfig", 
@@ -265,6 +322,7 @@
     }, 
 
     "sun7i-a20-cubieboard2": {
+	"mach": "sunxi",
 	"console": "cubie2",
 	"LPAE": true,
         "defconfig": [
@@ -274,6 +332,7 @@
     }, 
 
     "sun7i-a20-bananapi": {
+	"mach": "sunxi",
 	"console": "bananapi",
 	"LPAE": true,
         "defconfig": [
@@ -283,6 +342,7 @@
     }, 
 
     "tegra124-jetson-tk1": {
+	"mach": "tegra",
 	"console": "jetson",
 	"LPAE": true,
         "defconfig": [
@@ -292,6 +352,7 @@
     }, 
 
     "tegra30-beaver": {
+	"mach": "tegra",
 	"console": "beaver",
         "defconfig": [
             "tegra_defconfig",
@@ -300,6 +361,7 @@
     },
 
     "emev2-kzm9d": {
+	"mach": "shmobile",
 	"console": "kzm9d",
 	"defconfig": [
 	    "shmobile_defconfig"
@@ -307,6 +369,7 @@
     },
 
     "zynq-zc702": {
+	"mach": "zynq",
 	"console": "zynq",
 	"defconfig": [
 	    "multi_v7_defconfig"
@@ -314,6 +377,7 @@
     },
 
     "versatilepb": {
+	"mach": "versatile",
 	"legacy": true,
 	"modules": false,
 	"defconfig": [
@@ -322,6 +386,7 @@
     },
 
     "vexpress-v2p-ca9": {
+	"mach": "vexpress",
 	"defconfig": [
 	    "vexpress_defconfig",
 	    "multi_v7_defconfig",
@@ -330,6 +395,7 @@
     },
 
     "vexpress-v2p-ca15": {
+	"mach": "vexpress",
 	"dtb": "vexpress-v2p-ca15-tc1",
 	"LPAE": true,
 	"defconfig": [
@@ -339,24 +405,8 @@
 	]
     },
     
-    "qemu-aarch64": {
-	"arch": "arm64",
-	"legacy": true,
-	"defconfig": [
-	    "defconfig",
-	    "defconfig+CONFIG_OF_UNITTEST=y"
-	]
-    },
-
-    "am437x-gp-evm": {
-	"console": "am43xevm",
-        "defconfig": [
-            "multi_v7_defconfig", 
-            "omap2plus_defconfig"
-        ]
-    },
-
     "rk3288-evb-rk808": {
+	"mach": "rockchip",
 	"console": "rk3288-evb",
 	"LPAE": true,
         "defconfig": [
@@ -364,20 +414,13 @@
         ]
     },
 
-   "qcom-msm8974-sony-xperia-honami": {
-       "console": "z1",
-        "defconfig": [
-            "multi_v7_defconfig", 
-            "qcom_defconfig"
-        ]
-   },
-
-   "bcm2835-rpi": {
-       "console": "rpi",
-       "dtb": "bcm2835-rpi-b",
-       "defconfig": [
-           "bcm2835_defconfig"
-       ]
+    "qemu-aarch64": {
+	"arch": "arm64",
+	"legacy": true,
+	"defconfig": [
+	    "defconfig",
+	    "defconfig+CONFIG_OF_UNITTEST=y"
+	]
     }
 }
 
