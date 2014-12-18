@@ -21,7 +21,7 @@ lab = "lab-khilman"
 initrd = None
 
 subprocs = []
-max_subprocs = 20
+max_subprocs = 50
 
 def usage():
     print "Usage: %s <build dir>"
@@ -85,9 +85,8 @@ for board in boards.keys():
     if b.has_key("disabled") and b["disabled"]:
         continue
 
-    arch = "arm"
-    if b.has_key("arch"):
-        arch = b["arch"]
+    arch = b.get("arch", "arm")
+    mach = b.get("mach", None)
 
     dtbs = []
     if b.has_key("dtb"):
@@ -211,6 +210,8 @@ for board in boards.keys():
                         json.dump(boot_json, fp)
                     else:
                         cmd = "pyboot -q -b %s -w -s -n %s -L %s -l %s" %(build_json, logname, lab, logfile)
+                        if mach:
+                            cmd += " -M %s" %mach
                         if modules:
                             cmd += " -m %s" %modules
                         cmd += " %s %s %s %s" %(console, kimage, dtb_path, initrd)
