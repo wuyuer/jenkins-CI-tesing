@@ -9,6 +9,8 @@ import subprocess
 import struct
 import fileinput
 import re
+# to install run `pip install futures` on Python <3.2
+from concurrent.futures import ThreadPoolExecutor as Pool
 
 cfg_dir = "/home/khilman/work/kernel/tools/build-scripts"
 initrd_armel = "/opt/kjh/rootfs/buildroot/arm/rootfs.cpio.gz"
@@ -58,6 +60,7 @@ builds = os.listdir(dir)
 board_count = 0
 boot_count = 0
 total_count = 0
+pool = Pool(max_workers=max_subprocs)
 
 # keep track of blacklist, to be removed on the fly
 blacklist = {}
@@ -210,14 +213,7 @@ for board in boards.keys():
                             cmd += " -m %s" %modules
                         cmd += " %s %s %s %s" %(console, kimage, dtb_path, initrd)
                         print "\t", d, cmd
-                        #subprocess.call(cmd, shell=True)
-                        s = subprocess.Popen(cmd, shell=True)
-                        subprocs.append(s)
-
-                        # Limit how many jobs an run in parallel
-                        if len(subprocs) >= max_subprocs:
-                            s = subprocs.pop(0)
-                            s.wait()
+                        f = pool.submit(subprocess.call, "(cd %s; %s)" %(run_dir, cmd), shell=True)
 
                     c += 1
 
@@ -230,8 +226,6 @@ print "-------\n%d / %d Boots." %(boot_count, total_count)
 print board_count, "Boards."
 
 # Wait for any remaining jobs to finish
-while len(subprocs):
-    s = subprocs.pop(0)
-    s.wait()
+pool.shutdown()
 
 
