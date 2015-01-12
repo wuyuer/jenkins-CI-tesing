@@ -9,6 +9,7 @@ import subprocess
 import struct
 import fileinput
 import re
+import operator
 # to install run `pip install futures` on Python <3.2
 from concurrent.futures import ThreadPoolExecutor as Pool
 
@@ -21,7 +22,7 @@ lab = "lab-khilman"
 initrd = None
 
 subprocs = []
-max_subprocs = 50
+max_subprocs = 20
 
 def usage():
     print "Usage: %s <build dir>"
@@ -57,6 +58,7 @@ tree = os.path.basename(os.getcwd())
 
 builds = os.listdir(dir)
 
+mach_dict = {}
 board_count = 0
 boot_count = 0
 total_count = 0
@@ -87,6 +89,10 @@ for board in boards.keys():
 
     arch = b.get("arch", "arm")
     mach = b.get("mach", None)
+    k = "%s-%s" %(arch, mach)
+    mach_dict[k] = mach_dict.get(k, 0) + 1
+    if mach == None:
+        print "WARNING: board", board, "has no mach type."
 
     dtbs = []
     if b.has_key("dtb"):
@@ -202,12 +208,22 @@ for board in boards.keys():
                             continue
 
                     build_result = build_meta.get("build_result", "UNKNOWN")
+                    job = build_meta.get("job", None)
                     if build_result != "PASS":
                         print "\t%s%s: WARNING: Build failed.  Creating %s" %(board, d, jsonfile)
                         boot_json = {"boot_result": "UNTRIED"}
                         boot_json["boot_result_description"] = "Kernel build failed."
+                        boot_json["version"] = "1.0"
+                        boot_json["board"] = logname
+                        boot_json["lab_name"] = lab
+                        boot_json["arch"] = arch
+                        boot_json["defconfig"] = defconfig
+                        boot_json["kernel"] = git_describe
+                        if job:
+                            boot_json["job"] = job
+
                         fp = open(jsonfile, "w")
-                        json.dump(boot_json, fp)
+                        json.dump(boot_json, fp, indent=4, sort_keys=True)
                     else:
                         cmd = "pyboot -q -b %s -w -s -n %s -L %s -l %s" %(build_json, logname, lab, logfile)
                         if mach:
@@ -227,6 +243,10 @@ for board in boards.keys():
 
 print "-------\n%d / %d Boots." %(boot_count, total_count)
 print board_count, "Boards."
+print len(mach_dict), "Mach types."
+#sorted_mach = sorted(mach_dict.items(), key=operator.itemgetter(1), reverse=True)
+#for val in sorted_mach:
+#    print "%2d: %s" %(val[1], val[0])
 
 # Wait for any remaining jobs to finish
 pool.shutdown()
