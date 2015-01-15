@@ -8,9 +8,9 @@ import time
 
 maillog = None
 mail_to = None
-url_base = "http://storage.armcloud.us/kernel-ci"
-boot_url_base = "http://status.armcloud.us/boot/all/job"
-build_url_base = "http://status.armcloud.us/build"
+url_base = "http://storage.kernelci.org/kernel-ci"
+boot_url_base = "http://kernelci.org/boot/all/job"
+build_url_base = "http://kernelci.org/build"
 lab = "lab-khilman"
 
 def usage():
