@@ -97,6 +97,7 @@
     }, 
 
     "am437x-gp-evm": {
+        "mach": "omap2",
 	"console": "am43xevm",
         "defconfig": [
             "multi_v7_defconfig", 
