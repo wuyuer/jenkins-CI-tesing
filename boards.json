@@ -284,6 +284,7 @@
 	"mach": "at91",
 	"console": "sama5",
         "defconfig": [
+            "multi_v7_defconfig", 
             "sama5_defconfig"
         ]
     }, 
@@ -292,6 +293,7 @@
 	"mach": "at91",
 	"console": "xplained",
 	"defconfig": [
+            "multi_v7_defconfig", 
             "sama5_defconfig"
 	]
     },
