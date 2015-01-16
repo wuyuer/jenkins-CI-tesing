@@ -171,22 +171,22 @@
         ]
     }, 
 
-    "exynos5410-odroid-xu": {
+    "exynos5410-odroidxu": {
 	"mach": "exynos",
 	"console": "odroid-xu",
 	"LPAE": true,
-	"dtb": ["exynos5410-smdk5410", "exynos5410-odroidxu"],
+	"dtb": ["exynos5410-odroidxu", "exynos5410-smdk5410"],
         "defconfig": [
             "exynos_defconfig", 
             "multi_v7_defconfig"
         ]
     }, 
 
-    "exynos5422-odroid-xu3": {
+    "exynos5422-odroidxu3": {
 	"mach": "exynos",
 	"console": "odroid-xu3",
 	"LPAE": true,
-	"dtb": ["exynos5420-smdk5420", "exynos5422-odroidxu3"],
+	"dtb": ["exynos5422-odroidxu3", "exynos5420-smdk5420"],
 	"modules": false,
         "defconfig": [
             "exynos_defconfig", 
