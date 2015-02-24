@@ -102,6 +102,11 @@ for board in boards.keys():
                 dtbs = d
             else:
                 dtbs = [d]
+    
+    # on arm64, use mach type is dir for finding dtb
+    elif arch == "arm64" and mach:
+        dtbs = [os.path.join(mach, board)]
+
     else:
         dtbs = [board]
 
@@ -125,6 +130,8 @@ for board in boards.keys():
         if b.has_key("endian") and b["endian"] == "both":
             for defconfig in defconfig_list:
                 b["defconfig"].append(defconfig + "+" + "CONFIG_CPU_BIG_ENDIAN=y")
+        if "multi_v7_defconfig" in defconfig_list:
+            b["defconfig"].append("multi_v7_defconfig+CONFIG_PROVE_LOCKING=y")
 
     if b.has_key("defconfig"):
         for defconfig in b["defconfig"]:
@@ -167,7 +174,7 @@ for board in boards.keys():
                     if dtb:
                         dtb_path = os.path.join("dtbs", dtb) + ".dtb"
                         if not os.path.exists(dtb_path):
-#                            print "WARNING: DTB doesn't exist:", dtb_path
+#                            print "WARNING: DTB doesn't exist:", dtb_path, ". Skipping."
                             continue
 
                     # dtb == None means legacy boot, but only allow for non multi* defconfigs
