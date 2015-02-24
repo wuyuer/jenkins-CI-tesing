@@ -10,7 +10,7 @@ import subprocess
 import time
 import getopt
 
-tftp_server = '192.168.1.2'
+tftp_server = '192.168.1.3'
 
 def usage():
     print "Usage: fastboot <board> <tftp kernel path> [tftp dtb path] [tftp initrd path]"
@@ -54,6 +54,8 @@ boards = {
     'z1': ("BH9006CT08", "sony", None),
     'rk3288-evb': (None, "rockchip", None),
     'cm-qs600': ("f0b93ea2", "boot", None),
+    'mt8173evb': ("0123456789ABCDEF", "mkbootimg", None)  # product: TB8173EVB
+    # hikey: product: BalongV8R1SFT
 }
 
 kernel_l = ''
@@ -151,6 +153,21 @@ elif fastboot_cmd == 'flash':
     cmd = 'fastboot -s %s -c "%s" continue' %(id, cmdline)
     subprocess.call(cmd, shell=True)
 
+elif fastboot_cmd == "mkbootimg":
+    fd, bootimg = tempfile.mkstemp(prefix="boot.img")
+    mkbootimg_cmd = "/home/khilman/bin/mkbootimg --output %s --kernel %s " %(bootimg, kernel_l)
+    if initrd_l:
+        mkbootimg_cmd += "--ramdisk %s " %initrd_l
+    if dtb_l:
+        mkbootimg_cmd += "--second %s " %dtb_l
+    print "KJH:", mkbootimg_cmd
+    subprocess.call(mkbootimg_cmd, shell=True)
+
+    # Boot the image
+    cmd = "fastboot -s %s boot %s" %(id, bootimg)
+    print cmd
+    subprocess.call(cmd, shell=True)
+    
 # Nokia NOLO commands
 elif fastboot_cmd == 'nolo':
     # NOLO requires DTB appended
