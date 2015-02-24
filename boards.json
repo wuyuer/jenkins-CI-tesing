@@ -97,7 +97,7 @@
     }, 
 
     "am437x-gp-evm": {
-        "mach": "omap2",
+	"mach": "omap2",
 	"console": "am43xevm",
         "defconfig": [
             "multi_v7_defconfig", 
@@ -136,13 +136,13 @@
     }, 
 
    "bcm2835-rpi": {
-       "mach": "bcm",
-       "console": "rpi",
-       "dtb": "bcm2835-rpi-b",
-       "defconfig": [
-           "bcm2835_defconfig"
-       ]
-    },
+	"mach": "bcm",
+	"console": "rpi",
+	"dtb": "bcm2835-rpi-b",
+	"defconfig": [
+	    "bcm2835_defconfig"
+	]
+     },
 
     "dm365evm": {
 	"mach": "davinci",
@@ -282,7 +282,16 @@
 
     "sama5d35ek": {
 	"mach": "at91",
-	"console": "sama5",
+	"console": "sama5d3",
+        "defconfig": [
+            "multi_v7_defconfig", 
+            "sama5_defconfig"
+        ]
+    }, 
+
+    "at91-sama5d4ek": {
+	"mach": "at91",
+	"console": "sama5d4",
         "defconfig": [
             "multi_v7_defconfig", 
             "sama5_defconfig"
@@ -327,6 +336,16 @@
     "sun7i-a20-cubieboard2": {
 	"mach": "sunxi",
 	"console": "cubie2",
+	"LPAE": true,
+        "defconfig": [
+            "sunxi_defconfig", 
+            "multi_v7_defconfig"
+        ]
+    }, 
+
+    "sun7i-a20-cubietruck": {
+	"mach": "sunxi",
+	"console": "cubietruck",
 	"LPAE": true,
         "defconfig": [
             "sunxi_defconfig", 
@@ -417,8 +436,18 @@
         ]
     },
 
+    "mt8173-evb": {
+	"arch": "arm64",
+	"mach": "mediatek",
+	"console": "mt8173evb",
+	"defconfig": [
+	    "defconfig"
+	]
+    },
+
     "qemu-aarch64": {
 	"arch": "arm64",
+	"mach": "qemu",
 	"legacy": true,
 	"defconfig": [
 	    "defconfig",
