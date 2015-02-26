@@ -10,7 +10,6 @@ import sys
 import subprocess
 import getopt
 import tempfile
-import glob
 import fnmatch
 import shutil
 import re
