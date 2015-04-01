@@ -89,6 +89,9 @@ for build in os.listdir(dir):
     # Error messages, strip of the path prefix
     err_cmd = 'grep [Ee]rror: %s | cat' %buildlog
     errors = subprocess.check_output(err_cmd, shell=True).splitlines()
+    # Look for linker errors too
+    err_cmd = 'fgrep "undefined reference to" %s | cat' %buildlog
+    errors += subprocess.check_output(err_cmd, shell=True).splitlines()
     remove_prefix(errors, base)
 
     # Some errors start with ERROR:
