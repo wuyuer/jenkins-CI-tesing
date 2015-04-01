@@ -253,6 +253,9 @@ if num_warnings:
 
 err_cmd = 'grep -v ^# %s | fgrep -i error: | cat' %build_log
 errors = subprocess.check_output(err_cmd, shell=True).splitlines()
+# also check for linker error
+err_cmd = 'grep -v ^# %s | fgrep "undefined reference to" | cat' %build_log
+errors += subprocess.check_output(err_cmd, shell=True).splitlines()
 num_errors = len(errors)
 if num_errors:
     print "\nBuild Errors:", num_errors
