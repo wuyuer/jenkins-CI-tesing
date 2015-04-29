@@ -17,6 +17,9 @@ import stat
 import json
 import platform
 import time
+import requests
+import ConfigParser
+from urlparse import urljoin
 
 cross_compilers = {
     "arm": "arm-linux-gnueabi-",
@@ -87,6 +90,10 @@ kconfig_tmpfile_fd = None
 kconfig_frag = None
 frag_names = []
 install = False
+publish = False
+url = None
+token = None
+job = None
 
 # temp frag file: used to collect all kconfig fragments
 kconfig_tmpfile_fd, kconfig_tmpfile = tempfile.mkstemp(prefix='kconfig-')
@@ -98,7 +105,7 @@ else:
     os.environ['ARCH'] = arch
 
 try:
-    opts, args = getopt.getopt(sys.argv[1:], "c:si")
+    opts, args = getopt.getopt(sys.argv[1:], "c:ip:s")
 
 except getopt.GetoptError as err:
     print str(err) # will print something like "option -a not recognized"
@@ -130,6 +137,15 @@ for o, a in opts:
 
     if o == '-i':
         install = True
+    if o == '-p':
+        config = ConfigParser.ConfigParser()
+        try:
+            config.read(os.path.expanduser('~/.buildpy.cfg'))
+            url = config.get(a, 'url')
+            token = config.get(a, 'token')
+            publish = True
+        except:
+            print "ERROR: unable to load configuration file"
     if o == '-s':
         silent = not silent
 
@@ -401,14 +417,59 @@ if install:
     bmeta["build_errors"] = num_errors
     bmeta["build_warnings"] = num_warnings
     bmeta["build_platform"] = platform.uname()
-    if os.environ.has_key("TREE_NAME"):
-        bmeta["job"] = os.environ["TREE_NAME"]
+
+    if "TREE_NAME" in os.environ and len(os.environ["TREE_NAME"]) > 0:
+        job = os.environ["TREE_NAME"]
+        bmeta["job"] = job
+    else:
+        if publish:
+            print "ERROR: TREE_NAME not set, aborting publish step"
+            publish = False
 
     # Create JSON format build metadata
     build_json = os.path.join(install_path, 'build.json')
     build_json_f = open(build_json, 'w')
     json.dump(bmeta, build_json_f, indent=4, sort_keys=True)
     build_json_f.close()
+
+    if publish and job:
+        artifacts = []
+        if "defconfig_full" in bmeta:
+            defconfig = defconfig_full
+        publish_path = os.path.join(job, git_describe, arch + '-' + defconfig)
+        headers = {
+            'Authorization': token
+        }
+        data = {
+            'path': publish_path
+        }
+        count = 1
+        for root, dirs, files in os.walk(install_path):
+            if count == 1:
+                top_dir = root
+            for file_name in files:
+                name = file_name
+                if root != top_dir:
+                    # Get the relative subdir path
+                    subdir = root[len(top_dir)+1:]
+                    name = os.path.join(subdir, file_name)
+                artifacts.append(('file' + str(count),
+                                  (name,
+                                   open(os.path.join(root, file_name), 'rb'))))
+                count += 1
+        url = urljoin(url, '/upload')
+        retry = True
+        while retry:
+            response = requests.post(url, data=data, headers=headers, files=artifacts)
+            if response.status_code != 200:
+                print "ERROR: failed to publish"
+                print response.content
+                time.sleep(10)
+            else:
+                print "INFO: published artifacts"
+                for publish_result in json.loads(response.content)["result"]:
+                    print "%s/%s" % (publish_path, publish_result['filename'])
+                retry = False
 
 #
 # Cleanup
