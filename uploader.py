@@ -8,8 +8,11 @@ import os
 import time
 import ConfigParser
 
+debug = False
 
 def push(method, url, data, headers):
+    global debug
+
     retry = True
     while retry:
         if method == 'POST':
@@ -21,7 +24,8 @@ def push(method, url, data, headers):
             exit(1)
         if response.status_code != 500:
             retry = False
-            print "OK"
+            if debug:
+                print "OK"
         else:
             time.sleep(10)
             print response.content
@@ -33,12 +37,15 @@ def load_json(json_file):
 
 
 def main(args):
+    global debug
+
     # Initialize Variables
     job = None
     kernel = None
     defconfig = None
     arch = None
-
+    if args.debug:
+        debug = True
     # Parse the configuration for API credentials
     config = ConfigParser.ConfigParser()
     try:
@@ -63,14 +70,16 @@ def main(args):
             arch = boot_json['arch']
 
         if all([job, kernel, defconfig, arch]):
-                print 'Sending boot result....'
+                if debug:
+                    print 'Sending boot result....'
                 headers = {
                     'Authorization': token,
                     'Content-Type': 'application/json'
                 }
                 api_url = urlparse.urljoin(url, '/boot')
                 push('POST', api_url, json.dumps(boot_json), headers)
-                print 'Uploading text version of boot log...'
+                if debug:
+                    print 'Uploading text version of boot log...'
                 headers = {
                     'Authorization': token
                 }
@@ -83,7 +92,8 @@ def main(args):
                                                                                 lab,
                                                                                 os.path.basename(args.txt)))
                     push('PUT', api_url, data, headers)
-                print 'Uploading html version of boot log'
+                if debug:
+                    print 'Uploading html version of boot log'
                 headers = {
                     'Authorization': token
                 }
@@ -113,5 +123,6 @@ if __name__ == '__main__':
     parser.add_argument("--html", required=True, help="path a html log file")
     parser.add_argument("--txt", required=True, help="path a txt log file")
     parser.add_argument("--section", required=True, help="loads this configuration for authentication")
+    parser.add_argument("--debug", action='store_true')
     args = parser.parse_args()
     main(args)
