@@ -48,14 +48,16 @@ print "Running:", " ".join(sys.argv)
 boards = {
     'dragon': ("25001b4", "boot", None),
     'ifc6410': ("153952c", "boot", None),
-    'ifc6540': ("105869a1", "boot", None),
+#    'ifc6540': ("105869a1", "boot", None),
+    'ifc6540': ("105869a1", "abootimg", None),
     'capri': ("1234567890", "flash", ""),
     'n900': (None, "nolo", None),
     'z1': ("BH9006CT08", "sony", None),
     'rk3288-evb': (None, "rockchip", None),
     'cm-qs600': ("f0b93ea2", "boot", None),
-    'mt8173evb': ("0123456789ABCDEF", "mkbootimg", None)  # product: TB8173EVB
-    # hikey: product: BalongV8R1SFT
+    'mt8173evb': ("usb:1-3.2.1", "mkbootimg", None),  # product: TB8173EVB, usb:1-3.2.1
+    'mt8135': ("usb:1-3.2.3", "mkbootimg", None), # product: MT8135_EVBP1_V2, usb:1-3.2.3
+    'hikey': ("usb:1-3.3.1", "mkbootimg", None),
 }
 
 kernel_l = ''
@@ -117,7 +119,8 @@ if fastboot_cmd == 'boot':
     fastboot_args = ""
 
     # qcom hackery
-    if board.startswith("ifc6") or board.startswith("cm-qs"):
+    if board.startswith("ifc6410") or board.startswith("cm-qs"):
+        # 8064 trickery
         fastboot_args = "-b 0x82000000"
         fd, kernel_fixup = tempfile.mkstemp(prefix='kernel-fixup-')
         cmd = "cat /home/khilman/work.local/platforms/qcom/ifc6410/fixup.bin %s > %s" %(kernel_l, kernel_fixup)
@@ -167,6 +170,32 @@ elif fastboot_cmd == "mkbootimg":
     cmd = "fastboot -s %s boot %s" %(id, bootimg)
     print cmd
     subprocess.call(cmd, shell=True)
+    
+elif fastboot_cmd == "abootimg":
+    fd, bootimg = tempfile.mkstemp(prefix="boot.img")
+
+    # fastboot requires DTB appended
+    cmd = "cat %s >> %s" %(dtb_l, kernel_l)
+    print "INFO:", cmd
+    subprocess.call(cmd, shell=True)
+
+    abootimg_cmd = "abootimg --create %s -k %s " %(bootimg, kernel_l)
+    if cmdline:
+        abootimg_cmd += '-c "cmdline=%s" ' %cmdline
+    if initrd_l:
+        abootimg_cmd += "-r %s " %initrd_l
+    print "KJH:", abootimg_cmd
+    subprocess.call(abootimg_cmd, shell=True)
+
+    if board.startswith("ifc6540"):
+        subprocess.call("scp %s root@beaglebone:/tmp/" %bootimg, shell=True)
+        subprocess.call("ssh root@beaglebone fastboot boot %s" %bootimg, shell=True)
+
+    else:
+        # Boot the image
+        cmd = "fastboot -s %s boot %s" %(id, bootimg)
+        print cmd
+        subprocess.call(cmd, shell=True)
     
 # Nokia NOLO commands
 elif fastboot_cmd == 'nolo':
