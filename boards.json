@@ -186,8 +186,11 @@
 	"mach": "exynos",
 	"console": "odroid-xu3",
 	"LPAE": true,
-	"dtb": ["exynos5422-odroidxu3", "exynos5420-smdk5420"],
-	"modules": false,
+	"dtb": "exynos5422-odroidxu3",
+	"rootfs": [
+	    "mmc",
+	    "ramdisk"
+	],
         "defconfig": [
             "exynos_defconfig", 
             "multi_v7_defconfig"
@@ -198,7 +201,6 @@
 	"mach": "exynos",
 	"LPAE": true,
 	"console": "octa",
-	"modules": false,
         "defconfig": [
             "exynos_defconfig", 
             "multi_v7_defconfig"
@@ -209,6 +211,10 @@
 	"mach": "exynos",
 	"LPAE": true,
 	"console": "chromebook2",
+	"rootfs": [
+	    "mmc",
+	    "ramdisk"
+	],
         "defconfig": [
             "exynos_defconfig", 
             "multi_v7_defconfig"
@@ -357,6 +363,10 @@
 	"mach": "sunxi",
 	"console": "bananapi",
 	"LPAE": true,
+	"rootfs": [
+	    "mmc",
+	    "ramdisk"
+	],
         "defconfig": [
             "sunxi_defconfig", 
             "multi_v7_defconfig"
@@ -367,6 +377,10 @@
 	"mach": "tegra",
 	"console": "jetson",
 	"LPAE": true,
+	"rootfs": [
+	    "nfs",
+	    "ramdisk"
+	],
         "defconfig": [
             "tegra_defconfig",
             "multi_v7_defconfig" 
@@ -393,6 +407,14 @@
     "zynq-zc702": {
 	"mach": "zynq",
 	"console": "zynq",
+	"defconfig": [
+	    "multi_v7_defconfig"
+	]
+    },
+
+    "alpine-db": {
+	"mach": "alpine",
+	"console": "alpine",
 	"defconfig": [
 	    "multi_v7_defconfig"
 	]
