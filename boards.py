@@ -10,11 +10,12 @@ import struct
 import fileinput
 import re
 import operator
+import itertools
 # to install run `pip install futures` on Python <3.2
 from concurrent.futures import ThreadPoolExecutor as Pool
 
 cfg_dir = "/home/khilman/work/kernel/tools/build-scripts"
-initrd_armel = "/opt/kjh/rootfs/buildroot/arm/rootfs.cpio.gz"
+initrd_armel = "/opt/kjh/rootfs/buildroot/armel/rootfs.cpio.gz"
 initrd_armeb = "/opt/kjh/rootfs/buildroot/armeb/rootfs.cpio.gz"
 initrd_arm64 = "/opt/kjh/rootfs/buildroot/arm64/rootfs.cpio.gz"
 lab = "lab-khilman"
@@ -132,10 +133,15 @@ for board in boards.keys():
                 b["defconfig"].append(defconfig + "+" + "CONFIG_CPU_BIG_ENDIAN=y")
         if "multi_v7_defconfig" in defconfig_list:
             b["defconfig"].append("multi_v7_defconfig+CONFIG_PROVE_LOCKING=y")
+#            b["defconfig"].append("multi_v7_defconfig+tiny")
+
+    if not b.has_key("rootfs"):
+        b["rootfs"] = ["ramdisk", ]
 
     if b.has_key("defconfig"):
-        for defconfig in b["defconfig"]:
+        for defconfig, rootfs in itertools.product(b["defconfig"], b["rootfs"]):
             d = "%s-%s" %(arch, defconfig)
+
             for build in builds:
                 if build != d:
                     continue;
@@ -144,7 +150,12 @@ for board in boards.keys():
                 os.chdir(run_dir)
                 build_json = os.path.join("build.json")
 
-                fp = open(build_json, "r")
+                try:
+                    fp = open(build_json, "r")
+                except IOError as e:
+                    print "ERROR: Could not open %s " %os.path.join(run_dir, build_json),
+                    print "I/O error({0}): {1}".format(e.errno, e.strerror)
+
                 build_meta = json.load(fp)
                 fp.close()
 
@@ -159,12 +170,14 @@ for board in boards.keys():
                 kimage = "zImage"
                 if arch == "arm64":
                     kimage = "Image"
-                if os.path.exists(kimage):
+                if rootfs == "ramdisk" and os.path.exists(kimage):
                     initrd = initrd_armel
                     if zimage_is_big_endian(kimage):
                         initrd = initrd_armeb
                     if arch == "arm64":
                         initrd = initrd_arm64
+                else:
+                    initrd = ""
 
                 if modules and not os.path.exists(modules):
                     modules = None
@@ -199,6 +212,10 @@ for board in boards.keys():
                     else:
                         logname = board
 
+                    # Hack: to distinguish between rootfs types, append to board "name"
+                    if rootfs != "ramdisk":
+                        logname += "_rootfs:%s" %rootfs
+                    
                     a += 1
                     total_count += 1
                     logbase = "boot-%s" %logname
