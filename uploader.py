@@ -66,20 +66,20 @@ def main(args):
             kernel = boot_json['kernel']
         if 'defconfig' in boot_json:
             defconfig = boot_json['defconfig']
+        if 'defconfig_full' in boot_json:
+            defconfig = boot_json['defconfig_full']
         if 'arch' in boot_json:
             arch = boot_json['arch']
 
         if all([job, kernel, defconfig, arch]):
-                if debug:
-                    print 'Sending boot result....'
                 headers = {
                     'Authorization': token,
                     'Content-Type': 'application/json'
                 }
                 api_url = urlparse.urljoin(url, '/boot')
-                push('POST', api_url, json.dumps(boot_json), headers)
                 if debug:
-                    print 'Uploading text version of boot log...'
+                    print 'Sending boot result', args.boot, "to", api_url
+                push('POST', api_url, json.dumps(boot_json), headers)
                 headers = {
                     'Authorization': token
                 }
@@ -91,9 +91,10 @@ def main(args):
                                                                                 arch + '-' + defconfig,
                                                                                 lab,
                                                                                 os.path.basename(args.txt)))
+                    if debug:
+                        print 'Uploading text log to', api_url
                     push('PUT', api_url, data, headers)
-                if debug:
-                    print 'Uploading html version of boot log'
+
                 headers = {
                     'Authorization': token
                 }
@@ -105,6 +106,8 @@ def main(args):
                                                                                 arch + '-' + defconfig,
                                                                                 lab,
                                                                                 os.path.basename(args.html)))
+                    if debug:
+                        print 'Uploading html log to', api_url
                     push('PUT', api_url, data, headers)
                 else:
                     print "ERROR: txt log does not exist"
