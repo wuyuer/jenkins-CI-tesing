@@ -44,7 +44,8 @@ board_list = {
     # Phidget: 8-port, shelf 4
     'cubie2' :('phidget', 3, 0),
     'armadillo' :('phidget', 3, 1),
-    'acme': ('phidget', 3, 2), 
+#    'acme': ('phidget-', 3, 2), 
+    'hikey': ('phidget-', 3, 2, 'off', 5, 'on'), 
     'cubie': ('phidget', 3, 3), 
     'dragon-usb' :('phidget', 3, 4),
     'arndale': ('phidget', 3, 5),
@@ -70,14 +71,15 @@ board_list = {
     'bananapi': ('phidget', 5, 7),
 
     # SainSmart: 16-port
-    'hikey': ("sain", "192.168.1.4", 1),  # 12 V
+    'alpine': ("sain", "192.168.1.4", 1),  # 12 V
+    'ifc6540': ("sain", "192.168.1.4", 2, 'off', 4, 'on'), # 12 V
     'sama5d4': ("sain", "192.168.1.4", 15), # 5V
     'mt8173evb': ("sain", "192.168.1.4", 16), # 5V
 
     # IP 9258 (power1), shelf 1
     'zynq' : ('ip9258', 1, 1), # 12 V
     'beaver' : ('ip9258', 1, 2),  # 12 V
-    'ifc6540' : ('ip9258', 1, 3), # 12 V
+    # free
     'obsax3' : ('ip9258', 1, 4), # 12 V
     
     # IP 9258 (power2), shelf 3
