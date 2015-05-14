@@ -116,7 +116,7 @@ for o, a in opts:
         for a in defs:
             if os.path.exists("arch/%s/configs/%s" % (arch, a)):
                 defconfig = a
-            elif a == "defconfig" or re.match("all(\w*)config", a):
+            elif a == "defconfig" or a == "tinyconfig" or re.match("all(\w*)config", a):
                 defconfig = a
             elif os.path.exists(a):
                 # Append fragment contents to temp frag file
