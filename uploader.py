@@ -83,7 +83,7 @@ def main(args):
                 headers = {
                     'Authorization': token
                 }
-                if os.path.exists(os.path.expanduser(args.txt)):
+                if args.txt and os.path.exists(os.path.expanduser(args.txt)):
                     with open(args.txt) as lh:
                         data = lh.read()
                     api_url = urlparse.urljoin(url, '/upload/%s/%s/%s/%s/%s' % (job,
@@ -98,7 +98,7 @@ def main(args):
                 headers = {
                     'Authorization': token
                 }
-                if os.path.exists(os.path.expanduser(args.html)):
+                if args.html and os.path.exists(os.path.expanduser(args.html)):
                     with open(args.html) as lh:
                         data = lh.read()
                     api_url = urlparse.urljoin(url, '/upload/%s/%s/%s/%s/%s' % (job,
@@ -109,9 +109,7 @@ def main(args):
                     if debug:
                         print 'Uploading html log to', api_url
                     push('PUT', api_url, data, headers)
-                else:
-                    print "ERROR: txt log does not exist"
-                    exit(1)
+
         else:
             print "ERROR: not enough data in boot JSON"
             exit(1)
@@ -123,8 +121,8 @@ def main(args):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("--boot", required=True, help="path your boot JSON")
-    parser.add_argument("--html", required=True, help="path a html log file")
-    parser.add_argument("--txt", required=True, help="path a txt log file")
+    parser.add_argument("--html", help="path a html log file")
+    parser.add_argument("--txt", help="path a txt log file")
     parser.add_argument("--section", required=True, help="loads this configuration for authentication")
     parser.add_argument("--debug", action='store_true')
     args = parser.parse_args()
