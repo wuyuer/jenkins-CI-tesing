@@ -232,9 +232,9 @@ if tmplog and (not os.path.exists(tmplog) or os.path.getsize(tmplog) == 0):
 
 mail_headers = """From: Kevin's boot bot <khilman@kernel.org>
 To: %s
-Subject: %s%s boot: %d boots: %d pass, %d fail%s%s (%s)
+Subject: %s%s boot: %d boots: %d fail, %d pass%s%s (%s)
 
-""" %(mail_to, subject_prefix, tree_branch, total_board_count, total_pass_count, total_fail_count, offline_summary, untried_summary, describe)
+""" %(mail_to, subject_prefix, tree_branch, total_board_count, total_fail_count, total_pass_count, offline_summary, untried_summary, describe)
 
 # Create the final report with mail headers
 if maillog:
