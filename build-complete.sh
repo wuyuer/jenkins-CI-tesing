@@ -30,7 +30,7 @@ done
 
 # Tell the dashboard to import the build.
 echo "Build has now finished, reporting result to dashboard."
-curl -X POST -H "Authorization: e1c2910e-a05b-4c88-917e-1b9bbbd00378" -H "Content-Type: application/json" -d '{"job": "'$TREE_NAME'", "kernel": "'$GIT_DESCRIBE'"}' http://192.168.0.71:8888/job
+curl -X POST -H "Authorization: e1c2910e-a05b-4c88-917e-1b9bbbd00378" -H "Content-Type: application/json" -d '{"job": "'$TREE_NAME'", "kernel": "'$GIT_DESCRIBE'", "git_branch": "'$BRANCH'", "git_commit": "'$COMMIT_ID'", "git_url": "'$TREE'"  }' http://192.168.0.71:8888/job
 
 # Check if all builds for all architectures have finished. The magic number here is 3 (arm, arm64, x86)
 # This magic number will need to be changed if new architectures are added.
