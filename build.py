@@ -247,10 +247,10 @@ result = do_make(build_target, log=True)
 
 # Build modules
 modules = None
-if result == 0:
-    modules = not subprocess.call('grep -cq CONFIG_MODULES=y %s' %dot_config, shell=True) 
-    if modules:
-        result |= do_make('modules', log=True)
+#if result == 0:
+#    modules = not subprocess.call('grep -cq CONFIG_MODULES=y %s' %dot_config, shell=True) 
+#    if modules:
+#        result |= do_make('modules', log=True)
 
 build_time = time.time() - start_time
 
