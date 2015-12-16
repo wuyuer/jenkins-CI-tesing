@@ -3,10 +3,10 @@
 rm -rf *
 
 
-if [ $PUBLISH != true ]; then
-  echo "Skipping publish step.  PUBLISH != true."
-  exit 0
-fi
+#if [ $PUBLISH != true ]; then
+#  echo "Skipping publish step.  PUBLISH != true."
+#  exit 0
+#fi
 
 if [[ -z $TREE_NAME ]]; then
   echo "TREE_NAME not set.  Not publishing."
