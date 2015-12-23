@@ -8,9 +8,12 @@ import time
 
 maillog = None
 mail_to = None
-url_base = "http://storage.kernelci.org/kernel-ci"
-boot_url_base = "http://kernelci.org/boot/all/job"
-build_url_base = "http://kernelci.org/build"
+#url_base = "http://storage.kernelci.org/kernel-ci"
+#boot_url_base = "http://kernelci.org/boot/all/job"
+#build_url_base = "http://kernelci.org/build"
+url_base = "http://192.168.1.108"
+boot_url_base = "http://192.168.1.108:8888/boot"
+build_url_base = "http://192.168.1.108:8888/build"
 lab = "lab-khilman"
 
 def usage():
